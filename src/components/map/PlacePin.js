@@ -10,18 +10,18 @@ export default function PlacePin({ place, onClick, tagMatch }) {
 
   switch (place.stage) {
     case 3:
-      size = 20;
+      size = 36;
       opacity = 1;
       showRating = place.avgRating != null;
       break;
     case 2:
-      size = 16;
+      size = 30;
       opacity = 1;
       showRating = false;
       break;
     default:
-      size = 12;
-      opacity = 0.5;
+      size = 24;
+      opacity = 0.7;
       showRating = false;
   }
 
@@ -49,12 +49,12 @@ export default function PlacePin({ place, onClick, tagMatch }) {
         }}
       >
         {showRating && (
-          <span className="text-white text-[7px] font-bold leading-none">
+          <span className="text-white text-[11px] font-bold leading-none">
             {place.avgRating.toFixed(1)}
           </span>
         )}
         {showQuestion && (
-          <span className="text-white text-[8px] font-bold leading-none">?</span>
+          <span className="text-white text-[12px] font-bold leading-none">?</span>
         )}
       </div>
     </AdvancedMarker>

@@ -8,6 +8,28 @@ import PlaceCard from './PlaceCard';
 import DiscoverHereBanner from './DiscoverHereBanner';
 import { DEFAULT_MAP_CENTER, DEFAULT_MAP_ZOOM, SEEDABLE_TYPES } from '@/utils/constants';
 
+const CLEAN_MAP_STYLES = [
+  {
+    featureType: 'poi',
+    elementType: 'labels',
+    stylers: [{ visibility: 'off' }],
+  },
+  {
+    featureType: 'poi.business',
+    stylers: [{ visibility: 'off' }],
+  },
+  {
+    featureType: 'poi.park',
+    elementType: 'labels',
+    stylers: [{ visibility: 'on' }],
+  },
+  {
+    featureType: 'transit',
+    elementType: 'labels.icon',
+    stylers: [{ visibility: 'off' }],
+  },
+];
+
 export default function MapView({
   places,
   useCaseTags,
@@ -128,7 +150,7 @@ export default function MapView({
           defaultZoom={DEFAULT_MAP_ZOOM}
           gestureHandling="greedy"
           disableDefaultUI
-          mapId="axolocal-map"
+          styles={CLEAN_MAP_STYLES}
           onBoundsChanged={handleBoundsChanged}
           className="w-full h-full"
         >

@@ -164,9 +164,11 @@ export default function MapPage() {
             useCaseTags={useCaseTags}
             userLocation={location}
             groupId={group.id}
+            userId={userId}
             bundles={bundles}
             onPlaceSelect={handlePlaceSelect}
             onCheckIn={handleCheckIn}
+            onVisitedChange={refetch}
           />
         ) : (
           <PlaceList

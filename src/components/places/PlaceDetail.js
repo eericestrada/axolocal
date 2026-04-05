@@ -28,13 +28,15 @@ export default function PlaceDetail({ placeId }) {
   const [nameInput, setNameInput] = useState('');
   const [nicknameInput, setNicknameInput] = useState('');
   const [checkingIn, setCheckingIn] = useState(false);
+  const [visited, setVisited] = useState(false);
+  const [togglingVisited, setTogglingVisited] = useState(false);
   const supabase = createClient();
 
   const fetchData = useCallback(async () => {
     const { data: { user } } = await supabase.auth.getUser();
     setUserId(user?.id);
 
-    const [placeRes, ratingsRes, checkInsRes, tagVotesRes, tagsRes] =
+    const [placeRes, ratingsRes, checkInsRes, tagVotesRes, tagsRes, visitedRes] =
       await Promise.all([
         supabase.from('places').select('*').eq('id', placeId).single(),
         supabase
@@ -54,6 +56,12 @@ export default function PlaceDetail({ placeId }) {
           .from('use_case_tags')
           .select('*')
           .order('sort_order'),
+        user ? supabase
+          .from('visited_places')
+          .select('id')
+          .eq('place_id', placeId)
+          .eq('user_id', user.id)
+          .maybeSingle() : { data: null },
       ]);
 
     setPlace(placeRes.data);
@@ -61,6 +69,7 @@ export default function PlaceDetail({ placeId }) {
     setCheckIns(checkInsRes.data || []);
     setTagVotes(tagVotesRes.data || []);
     setUseCaseTags(tagsRes.data || []);
+    setVisited(!!visitedRes.data);
     setNameInput(placeRes.data?.name || '');
     setNicknameInput(placeRes.data?.nickname || '');
 
@@ -123,7 +132,7 @@ export default function PlaceDetail({ placeId }) {
   // Stage
   const hasTagYes = tagVotes.some((v) => v.vote === true);
   const stage =
-    hasTagYes ? 3 : ratings.length > 0 || checkIns.length > 0 ? 2 : 1;
+    hasTagYes ? 3 : ratings.length > 0 || checkIns.length > 0 || visited ? 2 : 1;
   const stageText =
     stage === 1
       ? 'Not yet visited'
@@ -182,6 +191,24 @@ export default function PlaceDetail({ placeId }) {
       .eq('place_id', placeId)
       .eq('user_id', userId);
     fetchData();
+  }
+
+  async function handleToggleVisited() {
+    setTogglingVisited(true);
+    if (visited) {
+      await supabase
+        .from('visited_places')
+        .delete()
+        .eq('place_id', placeId)
+        .eq('user_id', userId);
+    } else {
+      await supabase.from('visited_places').insert({
+        place_id: placeId,
+        user_id: userId,
+      });
+    }
+    setVisited(!visited);
+    setTogglingVisited(false);
   }
 
   return (
@@ -415,6 +442,17 @@ export default function PlaceDetail({ placeId }) {
 
       {/* Sticky action bar */}
       <div className="fixed bottom-12 left-0 right-0 bg-white border-t border-gray-200 px-4 py-2 flex gap-2 safe-bottom">
+        <button
+          onClick={handleToggleVisited}
+          disabled={togglingVisited}
+          className={`rounded-lg px-3 py-2 text-sm font-medium transition-colors disabled:opacity-50 ${
+            visited
+              ? 'bg-green-100 text-green-700 ring-1 ring-green-300'
+              : 'border border-gray-300 hover:bg-gray-50'
+          }`}
+        >
+          {visited ? 'Been Here' : 'Been Here?'}
+        </button>
         <button
           onClick={handleCheckIn}
           disabled={checkingIn}

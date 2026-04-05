@@ -3,14 +3,14 @@
 import { useState, useEffect, useCallback } from 'react';
 import { createClient } from '@/lib/supabase/client';
 
-function computeStage(place, ratingsMap, checkInsMap, tagVotesMap) {
+function computeStage(place, ratingsMap, checkInsMap, tagVotesMap, visitedSet) {
   const placeRatings = ratingsMap.get(place.id) || [];
   const placeCheckIns = checkInsMap.get(place.id) || [];
   const placeTags = tagVotesMap.get(place.id) || [];
   const hasTagYes = placeTags.some((v) => v.vote === true);
 
   if (hasTagYes) return 3;
-  if (placeRatings.length > 0 || placeCheckIns.length > 0) return 2;
+  if (placeRatings.length > 0 || placeCheckIns.length > 0 || visitedSet.has(place.id)) return 2;
   return 1;
 }
 
@@ -54,10 +54,11 @@ export function usePlaces(groupId) {
 
     setState((prev) => ({ ...prev, loading: true }));
 
-    // Step 1: fetch all places and user's hidden places
-    const [placesRes, hiddenRes] = await Promise.all([
+    // Step 1: fetch all places, hidden places, and visited places
+    const [placesRes, hiddenRes, visitedRes] = await Promise.all([
       supabase.from('places').select('*').eq('group_id', groupId).range(0, 4999),
       supabase.from('hidden_places').select('place_id'),
+      supabase.from('visited_places').select('place_id'),
     ]);
 
     if (placesRes.error) {
@@ -66,6 +67,7 @@ export function usePlaces(groupId) {
     }
 
     const hiddenIds = new Set((hiddenRes.data || []).map((h) => h.place_id));
+    const visitedSet = new Set((visitedRes.data || []).map((v) => v.place_id));
     const places = (placesRes.data || []).filter((p) => !hiddenIds.has(p.id));
 
     if (places.length === 0) {
@@ -115,7 +117,8 @@ export function usePlaces(groupId) {
         ratingCount: ratings.length,
         checkInCount: checkIns.length,
         tagSummary: buildTagSummary(tagVotes),
-        stage: computeStage(place, ratingsMap, checkInsMap, tagVotesMap),
+        stage: computeStage(place, ratingsMap, checkInsMap, tagVotesMap, visitedSet),
+        visited: visitedSet.has(place.id),
         ratings,
       };
     });

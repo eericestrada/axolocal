@@ -19,7 +19,7 @@ const AVAILABLE_GOOGLE_TYPES = [
   { category: 'Family & Kids', types: [
     'amusement_park', 'water_park', 'zoo', 'aquarium',
     'indoor_playground', 'miniature_golf_course', 'go_karting_venue',
-    'trampoline_park', 'skateboard_park', 'cycling_park',
+    'skateboard_park',
     'childrens_camp', 'summer_camp_organizer',
   ]},
   { category: 'Coffee & Tea', types: [
@@ -115,12 +115,12 @@ const AVAILABLE_GOOGLE_TYPES = [
   ]},
   { category: 'Entertainment', types: [
     'bowling_alley', 'video_arcade', 'amusement_center',
-    'escape_room', 'paintball_center', 'laser_tag_center',
+    'paintball_center',
     'off_roading_area', 'adventure_sports_center',
     'ferris_wheel', 'roller_coaster', 'observation_deck',
   ]},
   { category: 'Community', types: [
-    'community_center', 'recreation_center', 'event_venue',
+    'community_center', 'event_venue',
     'banquet_hall', 'convention_center', 'wedding_venue',
     'church', 'mosque', 'synagogue', 'buddhist_temple',
     'hindu_temple', 'shinto_shrine',

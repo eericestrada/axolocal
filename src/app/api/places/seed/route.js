@@ -39,7 +39,14 @@ function computeGrid(bounds) {
 
 const MAX_TYPES_PER_REQUEST = 50;
 
+// Track types Google has rejected so we don't retry them
+const invalidTypes = new Set();
+
 async function searchNearbyBatch(center, typeBatch) {
+  // Filter out previously rejected types
+  const validTypes = typeBatch.filter((t) => !invalidTypes.has(t));
+  if (validTypes.length === 0) return [];
+
   const res = await fetch('https://places.googleapis.com/v1/places:searchNearby', {
     method: 'POST',
     headers: {
@@ -48,7 +55,7 @@ async function searchNearbyBatch(center, typeBatch) {
       'X-Goog-FieldMask': 'places.id,places.displayName,places.formattedAddress,places.location,places.types,places.primaryType',
     },
     body: JSON.stringify({
-      includedTypes: typeBatch,
+      includedTypes: validTypes,
       locationRestriction: {
         circle: {
           center: { latitude: center.latitude, longitude: center.longitude },
@@ -62,6 +69,15 @@ async function searchNearbyBatch(center, typeBatch) {
   const data = await res.json();
 
   if (!res.ok) {
+    // If Google rejects a type, extract it, add to invalid set, and retry without it
+    const msg = data.error?.message || '';
+    const match = msg.match(/Unsupported types?: (.+)\./);
+    if (res.status === 400 && match) {
+      const badTypes = match[1].split(',').map((t) => t.trim());
+      badTypes.forEach((t) => invalidTypes.add(t));
+      console.warn('Skipping invalid types:', badTypes.join(', '));
+      return searchNearbyBatch(center, validTypes.filter((t) => !invalidTypes.has(t)));
+    }
     console.error('Nearby search error:', res.status, JSON.stringify(data));
     return [];
   }

@@ -17,7 +17,7 @@ export async function POST(request) {
     .from('push_subscriptions')
     .delete()
     .eq('user_id', user.id)
-    .eq('endpoint', endpoint);
+    .eq('subscription->>endpoint', endpoint);
 
   return NextResponse.json({ ok: true });
 }

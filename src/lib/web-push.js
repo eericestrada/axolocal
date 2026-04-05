@@ -14,30 +14,28 @@ webpush.setVapidDetails(
 export async function sendPushToUser(userId, payload) {
   const supabase = getServiceRoleClient();
 
-  const { data: subscriptions } = await supabase
+  const { data: rows } = await supabase
     .from('push_subscriptions')
-    .select('id, endpoint, keys_p256dh, keys_auth')
+    .select('id, subscription')
     .eq('user_id', userId);
 
-  if (!subscriptions || subscriptions.length === 0) return;
+  if (!rows || rows.length === 0) return;
 
   const results = await Promise.allSettled(
-    subscriptions.map(async (sub) => {
+    rows.map(async (row) => {
+      const sub = row.subscription;
       try {
         await webpush.sendNotification(
           {
             endpoint: sub.endpoint,
-            keys: {
-              p256dh: sub.keys_p256dh,
-              auth: sub.keys_auth,
-            },
+            keys: sub.keys,
           },
           JSON.stringify(payload)
         );
       } catch (err) {
         // 410 Gone or 404 = subscription expired, clean it up
         if (err.statusCode === 410 || err.statusCode === 404) {
-          await supabase.from('push_subscriptions').delete().eq('id', sub.id);
+          await supabase.from('push_subscriptions').delete().eq('id', row.id);
         }
         throw err;
       }

@@ -4,6 +4,7 @@ import { useState, useEffect } from 'react';
 import { useRouter } from 'next/navigation';
 import { createClient } from '@/lib/supabase/client';
 import { useGroup } from '@/hooks/useGroup';
+import { usePushSubscription } from '@/hooks/usePushSubscription';
 import StarRating from '@/components/ui/StarRating';
 
 export default function ProfilePage() {
@@ -15,6 +16,7 @@ export default function ProfilePage() {
   const [ratings, setRatings] = useState([]);
   const [visitedPlaces, setVisitedPlaces] = useState([]);
   const [loading, setLoading] = useState(true);
+  const { isSupported, isSubscribed, permission, loading: pushLoading, subscribe, unsubscribe } = usePushSubscription();
 
   useEffect(() => {
     if (!userId) return;
@@ -107,6 +109,40 @@ export default function ProfilePage() {
           <div className="bg-white px-3 py-3 text-center">
             <p className="text-lg font-bold text-gray-900">{stats.totalCheckIns}</p>
             <p className="text-xs text-gray-500">Check-ins</p>
+          </div>
+        </div>
+      )}
+
+      {/* Notifications */}
+      {isSupported && (
+        <div className="px-4 pt-4 pb-3 border-b border-gray-100">
+          <div className="flex items-center justify-between">
+            <div>
+              <h2 className="text-sm font-medium text-gray-900">Push Notifications</h2>
+              <p className="text-xs text-gray-500 mt-0.5">
+                {isSubscribed
+                  ? 'You\'ll be notified when people you follow are active'
+                  : 'Get notified when friends check in, rate, or add places'}
+              </p>
+              {permission === 'denied' && (
+                <p className="text-xs text-red-500 mt-0.5">
+                  Notifications are blocked. Enable them in your browser settings.
+                </p>
+              )}
+            </div>
+            <button
+              onClick={isSubscribed ? unsubscribe : subscribe}
+              disabled={pushLoading || permission === 'denied'}
+              className={`relative shrink-0 w-11 h-6 rounded-full transition-colors ${
+                isSubscribed ? 'bg-green-600' : 'bg-gray-300'
+              } ${(pushLoading || permission === 'denied') ? 'opacity-50' : ''}`}
+            >
+              <span
+                className={`absolute top-0.5 left-0.5 w-5 h-5 bg-white rounded-full shadow transition-transform ${
+                  isSubscribed ? 'translate-x-5' : 'translate-x-0'
+                }`}
+              />
+            </button>
           </div>
         </div>
       )}

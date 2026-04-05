@@ -136,8 +136,19 @@ export default function AddPlacePage() {
       group_id: group.id,
       user_id: userId,
       place_id: place.id,
-      action_type: 'place_added',
+      action_type: 'add_place',
       metadata: { name: selected.name, primaryType: selected.primaryType },
+    });
+    // Notify followers (fire and forget)
+    fetch('/api/push/notify', {
+      method: 'POST',
+      headers: { 'Content-Type': 'application/json' },
+      body: JSON.stringify({
+        actor_id: userId,
+        action_type: 'add_place',
+        place_name: selected.name,
+        place_id: place.id,
+      }),
     });
 
     setSaving(false);

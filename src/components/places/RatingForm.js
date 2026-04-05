@@ -4,7 +4,7 @@ import { useState, useCallback } from 'react';
 import { createClient } from '@/lib/supabase/client';
 import StarRating from '@/components/ui/StarRating';
 
-export default function RatingForm({ placeId, userId, groupId, existingRating, onSave }) {
+export default function RatingForm({ placeId, userId, groupId, placeName, existingRating, onSave }) {
   const [score, setScore] = useState(existingRating?.score || 0);
   const [note, setNote] = useState(existingRating?.note || '');
   const supabase = createClient();
@@ -28,9 +28,20 @@ export default function RatingForm({ placeId, userId, groupId, existingRating, o
         action_type: 'rating',
         metadata: { score: newScore },
       });
+      // Notify followers (fire and forget)
+      fetch('/api/push/notify', {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({
+          actor_id: userId,
+          action_type: 'rating',
+          place_name: placeName,
+          place_id: placeId,
+        }),
+      });
     }
     onSave?.();
-  }, [placeId, userId, groupId, supabase, onSave]);
+  }, [placeId, userId, groupId, placeName, supabase, onSave]);
 
   function handleScoreChange(newScore) {
     setScore(newScore);

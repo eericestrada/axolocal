@@ -145,6 +145,17 @@ export default function PlaceDetail({ placeId }) {
       place_id: placeId,
       action_type: 'check_in',
     });
+    // Notify followers (fire and forget)
+    fetch('/api/push/notify', {
+      method: 'POST',
+      headers: { 'Content-Type': 'application/json' },
+      body: JSON.stringify({
+        actor_id: userId,
+        action_type: 'check_in',
+        place_name: place.nickname || place.name,
+        place_id: placeId,
+      }),
+    });
     setCheckingIn(false);
     fetchData();
   }
@@ -339,6 +350,7 @@ export default function PlaceDetail({ placeId }) {
           placeId={placeId}
           userId={userId}
           groupId={place.group_id}
+          placeName={place.nickname || place.name}
           existingRating={myRating}
           onSave={fetchData}
         />

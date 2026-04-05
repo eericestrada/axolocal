@@ -92,6 +92,17 @@ export default function GooglePlacePreview({ place, groupId, userId, onClose, on
       action_type: 'add_place',
       metadata: { name: place.name, primaryType },
     });
+    // Notify followers (fire and forget)
+    fetch('/api/push/notify', {
+      method: 'POST',
+      headers: { 'Content-Type': 'application/json' },
+      body: JSON.stringify({
+        actor_id: userId,
+        action_type: 'add_place',
+        place_name: place.name,
+        place_id: newPlace.id,
+      }),
+    });
 
     setSaving(false);
     onAdded?.(newPlace.id);

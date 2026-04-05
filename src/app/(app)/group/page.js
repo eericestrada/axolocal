@@ -3,6 +3,7 @@
 import { useState, useEffect, useCallback } from 'react';
 import Link from 'next/link';
 import { createClient } from '@/lib/supabase/client';
+import { useFollows } from '@/hooks/useFollows';
 
 export default function GroupPage() {
   const [group, setGroup] = useState(null);
@@ -12,11 +13,14 @@ export default function GroupPage() {
   const [creating, setCreating] = useState(false);
   const [groupName, setGroupName] = useState('');
   const [copied, setCopied] = useState(false);
+  const [currentUserId, setCurrentUserId] = useState(null);
   const supabase = createClient();
+  const { isFollowing, toggleFollow } = useFollows();
 
   const loadGroup = useCallback(async () => {
     const { data: { user } } = await supabase.auth.getUser();
     if (!user) return;
+    setCurrentUserId(user.id);
 
     // Get user's group membership
     const { data: membership } = await supabase
@@ -189,23 +193,41 @@ export default function GroupPage() {
       <h2 className="text-sm font-medium mb-2">
         Members ({members.length})
       </h2>
+      <p className="text-xs text-gray-400 mb-2">Follow members to get notified when they check in, rate, or add places.</p>
       <ul className="space-y-2">
-        {members.map((member) => (
-          <li
-            key={member.profiles.id}
-            className="flex items-center gap-3 rounded-lg border border-gray-200 p-3"
-          >
-            <div className="w-8 h-8 rounded-full bg-green-100 flex items-center justify-center text-sm font-medium text-green-700">
-              {member.profiles.display_name.charAt(0).toUpperCase()}
-            </div>
-            <div className="flex-1">
-              <p className="text-sm font-medium">
-                {member.profiles.display_name}
-              </p>
-              <p className="text-xs text-gray-500 capitalize">{member.role}</p>
-            </div>
-          </li>
-        ))}
+        {members.map((member) => {
+          const isSelf = member.profiles.id === currentUserId;
+          const following = isFollowing(member.profiles.id);
+          return (
+            <li
+              key={member.profiles.id}
+              className="flex items-center gap-3 rounded-lg border border-gray-200 p-3"
+            >
+              <div className="w-8 h-8 rounded-full bg-green-100 flex items-center justify-center text-sm font-medium text-green-700">
+                {member.profiles.display_name.charAt(0).toUpperCase()}
+              </div>
+              <div className="flex-1">
+                <p className="text-sm font-medium">
+                  {member.profiles.display_name}
+                  {isSelf && <span className="text-xs text-gray-400 ml-1">(you)</span>}
+                </p>
+                <p className="text-xs text-gray-500 capitalize">{member.role}</p>
+              </div>
+              {!isSelf && (
+                <button
+                  onClick={() => toggleFollow(member.profiles.id)}
+                  className={`rounded-full px-3 py-1 text-xs font-medium transition-colors ${
+                    following
+                      ? 'bg-green-600 text-white'
+                      : 'bg-gray-100 text-gray-600 hover:bg-gray-200'
+                  }`}
+                >
+                  {following ? 'Following' : 'Follow'}
+                </button>
+              )}
+            </li>
+          );
+        })}
       </ul>
     </div>
   );

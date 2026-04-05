@@ -38,35 +38,18 @@ export default function DiscoverPage() {
     ? { lat: location.latitude, lng: location.longitude }
     : DEFAULT_MAP_CENTER;
 
-  function handleBoundsChanged(event) {
+  function handleIdle(event) {
     const map = event.map;
     const bounds = map.getBounds();
     if (!bounds) return;
     const ne = bounds.getNorthEast();
     const sw = bounds.getSouthWest();
-    const newBounds = {
+    boundsRef.current = {
       north: ne.lat(),
       south: sw.lat(),
       east: ne.lng(),
       west: sw.lng(),
     };
-
-    // Only clear estimate if bounds changed significantly (user panned/zoomed)
-    const prev = boundsRef.current;
-    if (prev) {
-      const threshold = 0.001; // ~100m
-      const moved =
-        Math.abs(prev.north - newBounds.north) > threshold ||
-        Math.abs(prev.south - newBounds.south) > threshold ||
-        Math.abs(prev.east - newBounds.east) > threshold ||
-        Math.abs(prev.west - newBounds.west) > threshold;
-      if (moved) {
-        setEstimate(null);
-        setResult(null);
-      }
-    }
-
-    boundsRef.current = newBounds;
   }
 
   async function handleEstimate() {
@@ -135,7 +118,7 @@ export default function DiscoverPage() {
             gestureHandling="greedy"
             disableDefaultUI
             mapId="81fa7c449cfa673e73222cfd"
-            onBoundsChanged={handleBoundsChanged}
+            onIdle={handleIdle}
             className="w-full h-full"
           />
         </MapProvider>

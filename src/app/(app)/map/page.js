@@ -8,6 +8,7 @@ import { usePlaces } from '@/hooks/usePlaces';
 import { useFilters, filterPlaces } from '@/hooks/useFilters';
 import { useLocation } from '@/hooks/useLocation';
 import MapView from '@/components/map/MapView';
+import PlaceList from '@/components/places/PlaceList';
 import TypeFilterBar from '@/components/filters/TypeFilterBar';
 import FunctionTagChips from '@/components/filters/FunctionTagChips';
 import VisitedToggle from '@/components/filters/VisitedToggle';
@@ -20,6 +21,7 @@ export default function MapPage() {
   const { filters, dispatch } = useFilters();
   const location = useLocation();
   const [useCaseTags, setUseCaseTags] = useState([]);
+  const [viewMode, setViewMode] = useState('map'); // 'map' | 'list'
 
   useEffect(() => {
     supabase
@@ -84,13 +86,57 @@ export default function MapPage() {
 
   return (
     <div className="relative flex flex-col h-full">
-      {/* Filter bar */}
-      <div className="absolute top-0 left-0 right-0 z-10 bg-white/90 backdrop-blur-sm">
+      {/* Header bar */}
+      <div className="z-10 bg-white/90 backdrop-blur-sm border-b border-gray-100">
+        {/* Top row: view toggle + discover button */}
+        <div className="flex items-center justify-between px-3 pt-2">
+          {/* View toggle */}
+          <div className="flex rounded-lg border border-gray-200 overflow-hidden">
+            <button
+              onClick={() => setViewMode('map')}
+              className={`px-3 py-1 text-xs font-medium ${
+                viewMode === 'map'
+                  ? 'bg-gray-800 text-white'
+                  : 'bg-white text-gray-600 hover:bg-gray-50'
+              }`}
+            >
+              Map
+            </button>
+            <button
+              onClick={() => setViewMode('list')}
+              className={`px-3 py-1 text-xs font-medium ${
+                viewMode === 'list'
+                  ? 'bg-gray-800 text-white'
+                  : 'bg-white text-gray-600 hover:bg-gray-50'
+              }`}
+            >
+              List
+            </button>
+          </div>
+
+          {/* Place count */}
+          <span className="text-xs text-gray-400">
+            {filteredPlaces.length} place{filteredPlaces.length !== 1 ? 's' : ''}
+          </span>
+
+          {/* Discover button */}
+          <button
+            onClick={() => router.push('/discover')}
+            className="flex items-center gap-1.5 rounded-full bg-green-600 px-3 py-1 text-xs font-medium text-white hover:bg-green-700"
+          >
+            <svg className="w-3.5 h-3.5" fill="none" viewBox="0 0 24 24" strokeWidth={2} stroke="currentColor">
+              <path strokeLinecap="round" strokeLinejoin="round" d="M21 21l-5.197-5.197m0 0A7.5 7.5 0 105.196 5.196a7.5 7.5 0 0010.607 10.607z" />
+            </svg>
+            Discover
+          </button>
+        </div>
+
+        {/* Filter bar */}
         <TypeFilterBar
           selectedType={filters.selectedType}
           onSelect={(type) => dispatch({ type: 'SET_TYPE', payload: type })}
         />
-        <div className="flex items-center gap-2">
+        <div className="flex items-center gap-2 pb-1">
           <FunctionTagChips
             useCaseTags={useCaseTags}
             selectedTags={filters.selectedTags}
@@ -105,16 +151,23 @@ export default function MapPage() {
         </div>
       </div>
 
-      {/* Map */}
-      <div className="flex-1">
-        <MapView
-          places={filteredPlaces}
-          useCaseTags={useCaseTags}
-          userLocation={location}
-          groupId={group.id}
-          onPlaceSelect={handlePlaceSelect}
-          onCheckIn={handleCheckIn}
-        />
+      {/* Content */}
+      <div className="flex-1 min-h-0">
+        {viewMode === 'map' ? (
+          <MapView
+            places={filteredPlaces}
+            useCaseTags={useCaseTags}
+            userLocation={location}
+            groupId={group.id}
+            onPlaceSelect={handlePlaceSelect}
+            onCheckIn={handleCheckIn}
+          />
+        ) : (
+          <PlaceList
+            places={filteredPlaces}
+            onSelect={handlePlaceSelect}
+          />
+        )}
       </div>
     </div>
   );

@@ -1,3 +1,4 @@
+import Image from 'next/image';
 import Link from 'next/link';
 import { createClient } from '@/lib/supabase/server';
 import { redirect } from 'next/navigation';
@@ -14,13 +15,15 @@ export default async function HomePage() {
 
   return (
     <div className="flex min-h-full flex-col items-center justify-center px-6 py-12">
-      <div className="text-center max-w-md">
-        <h1 className="text-4xl font-bold mb-3">Axolocal</h1>
-        <p className="text-lg text-gray-600 mb-8">
-          Discover, rate, and track local places with your friends. Find
-          kid-friendly parks, work-friendly cafes, and hidden gems — curated by
-          the people you trust.
-        </p>
+      <div className="text-center max-w-sm">
+        <Image
+          src="/logo.png"
+          alt="Axolocal"
+          width={200}
+          height={200}
+          className="mx-auto mb-6"
+          priority
+        />
 
         <div className="space-y-3">
           <Link

@@ -54,18 +54,21 @@ export function usePlaces(groupId) {
 
     setState((prev) => ({ ...prev, loading: true }));
 
-    // Step 1: fetch all places
-    const { data: places, error: placesError } = await supabase
-      .from('places')
-      .select('*')
-      .eq('group_id', groupId);
+    // Step 1: fetch all places and user's hidden places
+    const [placesRes, hiddenRes] = await Promise.all([
+      supabase.from('places').select('*').eq('group_id', groupId),
+      supabase.from('hidden_places').select('place_id'),
+    ]);
 
-    if (placesError) {
-      setState({ places: [], loading: false, error: placesError.message });
+    if (placesRes.error) {
+      setState({ places: [], loading: false, error: placesRes.error.message });
       return;
     }
 
-    if (!places || places.length === 0) {
+    const hiddenIds = new Set((hiddenRes.data || []).map((h) => h.place_id));
+    const places = (placesRes.data || []).filter((p) => !hiddenIds.has(p.id));
+
+    if (places.length === 0) {
       setState({ places: [], loading: false, error: null });
       return;
     }

@@ -20,6 +20,7 @@ export default function PlaceDetail({ placeId }) {
   const [tagVotes, setTagVotes] = useState([]);
   const [useCaseTags, setUseCaseTags] = useState([]);
   const [userId, setUserId] = useState(null);
+  const [userRole, setUserRole] = useState(null);
   const [loading, setLoading] = useState(true);
   const [showRatingForm, setShowRatingForm] = useState(false);
   const [showAttributeForm, setShowAttributeForm] = useState(false);
@@ -62,6 +63,18 @@ export default function PlaceDetail({ placeId }) {
     setUseCaseTags(tagsRes.data || []);
     setNameInput(placeRes.data?.name || '');
     setNicknameInput(placeRes.data?.nickname || '');
+
+    // Get user's role in this place's group
+    if (user && placeRes.data?.group_id) {
+      const { data: membership } = await supabase
+        .from('group_members')
+        .select('role')
+        .eq('group_id', placeRes.data.group_id)
+        .eq('user_id', user.id)
+        .single();
+      setUserRole(membership?.role || null);
+    }
+
     setLoading(false);
   }, [placeId, supabase]);
 
@@ -146,8 +159,17 @@ export default function PlaceDetail({ placeId }) {
     fetchData();
   }
 
+  async function handleHidePlace() {
+    if (!confirm('Hide this place? It will disappear from your map and lists. You can ask an admin to unhide it later.')) return;
+    await supabase.from('hidden_places').insert({
+      user_id: userId,
+      place_id: placeId,
+    });
+    router.push('/map');
+  }
+
   async function handleDeletePlace() {
-    if (!confirm('Remove this place? This will delete all ratings, check-ins, and tag votes for it.')) return;
+    if (!confirm('Delete this place for the entire group? This removes all ratings, check-ins, and tag votes permanently.')) return;
     await supabase.from('places').delete().eq('id', placeId);
     router.push('/map');
   }
@@ -372,14 +394,22 @@ export default function PlaceDetail({ placeId }) {
         )}
       </div>
 
-      {/* Delete place */}
-      <div className="p-4">
+      {/* Place actions */}
+      <div className="p-4 space-y-2">
         <button
-          onClick={handleDeletePlace}
-          className="text-xs text-red-500 hover:text-red-700"
+          onClick={handleHidePlace}
+          className="block text-xs text-gray-500 hover:text-gray-700"
         >
-          Remove this place
+          Hide this place from my view
         </button>
+        {userRole === 'admin' && (
+          <button
+            onClick={handleDeletePlace}
+            className="block text-xs text-red-500 hover:text-red-700"
+          >
+            Delete for entire group
+          </button>
+        )}
       </div>
 
       {/* Sticky action bar */}

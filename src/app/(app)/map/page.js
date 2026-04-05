@@ -195,6 +195,7 @@ export default function MapPage() {
           <PlaceList
             places={filteredPlaces}
             bundles={bundles}
+            useCaseTags={useCaseTags}
             onSelect={handlePlaceSelect}
           />
         )}

@@ -2,7 +2,14 @@
 
 import { PIN_COLORS } from '@/utils/constants';
 
-export default function PlaceList({ places, bundles, onSelect }) {
+export default function PlaceList({ places, bundles, useCaseTags, onSelect }) {
+  // Build tag label lookup
+  const tagLabels = {};
+  if (useCaseTags) {
+    for (const tag of useCaseTags) {
+      tagLabels[tag.id] = tag.label;
+    }
+  }
   // Build color map from bundles
   const colorMap = { ...PIN_COLORS };
   if (bundles) {
@@ -72,7 +79,7 @@ export default function PlaceList({ places, bundles, onSelect }) {
                         key={tagId}
                         className="inline-block rounded-full bg-green-50 text-green-700 px-2 py-0.5 text-[10px] font-medium"
                       >
-                        {summary.label || tagId} {pct}%
+                        {tagLabels[tagId] || tagId} {pct}%
                       </span>
                     );
                   })}

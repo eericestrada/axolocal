@@ -15,11 +15,9 @@ export default function MapView({
   useCaseTags,
   userLocation,
   groupId,
-  userId,
   bundles,
   onPlaceSelect,
   onCheckIn,
-  onVisitedChange,
 }) {
   // Build color map from bundles (slug -> color), fall back to PIN_COLORS
   const colorMap = useMemo(() => {
@@ -168,14 +166,12 @@ export default function MapView({
         <PlaceCard
           place={selectedPlace}
           useCaseTags={useCaseTags}
-          userId={userId}
           onClose={() => setSelectedPlace(null)}
           onDetail={(id) => {
             setSelectedPlace(null);
             onPlaceSelect?.(id);
           }}
           onCheckIn={onCheckIn}
-          onVisitedChange={onVisitedChange}
         />
       </div>
     </MapProvider>

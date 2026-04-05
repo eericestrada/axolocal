@@ -30,7 +30,7 @@ export default function BottomSheet({ open, onClose, title, children, height = '
         className={`fixed bottom-0 left-0 right-0 z-50 bg-white rounded-t-2xl transition-transform duration-200 ease-out ${
           open ? 'translate-y-0' : 'translate-y-full'
         }`}
-        style={{ height }}
+        style={height === 'auto' ? { maxHeight: '80vh' } : { height }}
       >
         {/* Drag handle */}
         <div className="flex justify-center pt-2 pb-1">
@@ -43,7 +43,10 @@ export default function BottomSheet({ open, onClose, title, children, height = '
           </div>
         )}
 
-        <div className="overflow-y-auto px-4 py-3" style={{ maxHeight: `calc(${height} - 3rem)` }}>
+        <div
+          className="overflow-y-auto px-4 py-3"
+          style={height === 'auto' ? { maxHeight: 'calc(80vh - 3rem)' } : { maxHeight: `calc(${height} - 3rem)` }}
+        >
           {children}
         </div>
       </div>

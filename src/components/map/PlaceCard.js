@@ -1,25 +1,14 @@
 'use client';
 
-import { useState } from 'react';
-import { createClient } from '@/lib/supabase/client';
 import BottomSheet from '@/components/ui/BottomSheet';
 import StarRating from '@/components/ui/StarRating';
 import ConfidenceBadge from '@/components/ui/ConfidenceBadge';
 import { PIN_COLORS } from '@/utils/constants';
 
-export default function PlaceCard({ place, useCaseTags, userId, onClose, onDetail, onCheckIn, onVisitedChange }) {
-  const [togglingVisited, setTogglingVisited] = useState(false);
-  const supabase = createClient();
-
+export default function PlaceCard({ place, useCaseTags, onClose, onDetail, onCheckIn }) {
   if (!place) return null;
 
   const color = PIN_COLORS[place.primary_type] || PIN_COLORS.other;
-  const stageText =
-    place.stage === 1
-      ? 'Not yet visited'
-      : place.stage === 2
-        ? 'Visited'
-        : 'Fully characterized';
 
   function handleNavigate() {
     const q = place.address || `${place.latitude},${place.longitude}`;
@@ -29,35 +18,30 @@ export default function PlaceCard({ place, useCaseTags, userId, onClose, onDetai
     );
   }
 
-  async function handleToggleVisited() {
-    if (!userId) return;
-    setTogglingVisited(true);
-    if (place.visited) {
-      await supabase
-        .from('visited_places')
-        .delete()
-        .eq('place_id', place.id)
-        .eq('user_id', userId);
-    } else {
-      await supabase.from('visited_places').insert({
-        place_id: place.id,
-        user_id: userId,
-      });
+  // Build recent activity text from ratings
+  const recentActivity = [];
+  if (place.ratings?.length > 0) {
+    for (const r of place.ratings.slice(0, 2)) {
+      const name = r.profiles?.display_name || r.display_name;
+      if (name) {
+        recentActivity.push(`${name} rated ${r.score}/5${r.note ? ` — "${r.note}"` : ''}`);
+      }
     }
-    setTogglingVisited(false);
-    onVisitedChange?.();
+  }
+  if (place.checkInCount > 0) {
+    recentActivity.push(`${place.checkInCount} check-in${place.checkInCount !== 1 ? 's' : ''}`);
   }
 
   return (
-    <BottomSheet open={!!place} onClose={onClose} height="55vh">
+    <BottomSheet open={!!place} onClose={onClose} height="auto">
       {/* Name and type */}
       <div className="flex items-start gap-2 mb-1">
-        <div className="flex-1">
-          <h3 className="text-base font-semibold leading-tight">
+        <div className="flex-1 min-w-0">
+          <h3 className="text-base font-semibold leading-tight truncate">
             {place.nickname || place.name}
           </h3>
           {place.nickname && (
-            <p className="text-xs text-gray-500">{place.name}</p>
+            <p className="text-xs text-gray-500 truncate">{place.name}</p>
           )}
         </div>
         <span
@@ -82,42 +66,43 @@ export default function PlaceCard({ place, useCaseTags, userId, onClose, onDetai
         </button>
       )}
 
-      {/* Rating + stage */}
-      <div className="flex items-center gap-2 mb-2">
+      {/* Rating + tags in one row */}
+      <div className="flex items-center gap-2 flex-wrap mb-2">
         {place.avgRating != null ? (
-          <>
+          <div className="flex items-center gap-1">
             <StarRating value={place.avgRating} readOnly size="sm" />
             <span className="text-xs text-gray-500">
-              {place.avgRating.toFixed(1)} ({place.ratingCount})
+              {place.avgRating.toFixed(1)}
             </span>
-          </>
+          </div>
         ) : (
           <span className="text-xs text-gray-400">No ratings yet</span>
         )}
-        <span className="text-xs text-gray-400">·</span>
-        <span className="text-xs text-gray-400">{stageText}</span>
+        {useCaseTags?.map((tag) => {
+          const summary = place.tagSummary?.[tag.id];
+          if (!summary || summary.total === 0) return null;
+          return (
+            <ConfidenceBadge
+              key={tag.id}
+              label={tag.label}
+              yesCount={summary.yes}
+              totalCount={summary.total}
+            />
+          );
+        })}
       </div>
 
-      {/* Tags */}
-      {useCaseTags && (
-        <div className="flex flex-wrap gap-1 mb-3">
-          {useCaseTags.map((tag) => {
-            const summary = place.tagSummary?.[tag.id];
-            if (!summary || summary.total === 0) return null;
-            return (
-              <ConfidenceBadge
-                key={tag.id}
-                label={tag.label}
-                yesCount={summary.yes}
-                totalCount={summary.total}
-              />
-            );
-          })}
+      {/* Recent activity */}
+      {recentActivity.length > 0 && (
+        <div className="mb-2">
+          {recentActivity.map((text, i) => (
+            <p key={i} className="text-xs text-gray-500 truncate">{text}</p>
+          ))}
         </div>
       )}
 
       {/* Actions */}
-      <div className="flex gap-2 mb-2">
+      <div className="flex gap-2">
         <button
           onClick={handleNavigate}
           className="flex-1 rounded-lg bg-green-600 px-4 py-2 text-sm font-medium text-white hover:bg-green-700"
@@ -125,31 +110,18 @@ export default function PlaceCard({ place, useCaseTags, userId, onClose, onDetai
           Navigate
         </button>
         <button
-          onClick={handleToggleVisited}
-          disabled={togglingVisited}
-          className={`rounded-lg px-3 py-2 text-sm font-medium transition-colors disabled:opacity-50 ${
-            place.visited
-              ? 'bg-green-100 text-green-700 ring-1 ring-green-300'
-              : 'border border-gray-300 hover:bg-gray-50'
-          }`}
-        >
-          {place.visited ? 'Been Here' : 'Been Here?'}
-        </button>
-        <button
           onClick={() => onCheckIn?.(place)}
-          className="rounded-lg border border-gray-300 px-3 py-2 text-sm font-medium hover:bg-gray-50"
+          className="flex-1 rounded-lg border border-gray-300 px-4 py-2 text-sm font-medium hover:bg-gray-50"
         >
           Check In
         </button>
+        <button
+          onClick={() => onDetail?.(place.id)}
+          className="rounded-lg border border-gray-300 px-3 py-2 text-sm font-medium hover:bg-gray-50"
+        >
+          Details
+        </button>
       </div>
-
-      {/* Details link */}
-      <button
-        onClick={() => onDetail?.(place.id)}
-        className="w-full text-center text-xs text-gray-500 hover:text-gray-700 py-1"
-      >
-        View full details &rarr;
-      </button>
     </BottomSheet>
   );
 }

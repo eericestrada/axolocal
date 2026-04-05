@@ -81,7 +81,7 @@ export function usePlaces(groupId) {
     const [ratingsRes, checkInsRes, tagVotesRes] = await Promise.all([
       supabase
         .from('ratings')
-        .select('place_id, user_id, score, note')
+        .select('place_id, user_id, score, note, profiles(display_name)')
         .in('place_id', placeIds)
         .range(0, 4999),
       supabase

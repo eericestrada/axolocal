@@ -232,7 +232,7 @@ export default function PlaceDetail({ placeId }) {
             defaultCenter={{ lat: place.latitude, lng: place.longitude }}
             defaultZoom={15}
             disableDefaultUI
-            mapId="81fa7c449cfa673e1ee5e17e"
+            mapId="81fa7c449cfa673e6246dc01"
             className="w-full h-full"
           />
         </MapProvider>

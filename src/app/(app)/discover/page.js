@@ -105,7 +105,7 @@ export default function DiscoverPage() {
             defaultZoom={DEFAULT_MAP_ZOOM}
             gestureHandling="greedy"
             disableDefaultUI
-            mapId="81fa7c449cfa673e1ee5e17e"
+            mapId="81fa7c449cfa673e73222cfd"
             onBoundsChanged={handleBoundsChanged}
             className="w-full h-full"
           />

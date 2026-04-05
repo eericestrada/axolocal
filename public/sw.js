@@ -1,4 +1,4 @@
-const CACHE_NAME = 'axolocal-shell-v1';
+const CACHE_NAME = 'axolocal-shell-v2';
 
 const SHELL_ASSETS = [
   '/',
@@ -77,12 +77,20 @@ self.addEventListener('fetch', (event) => {
 
 // Handle push notifications
 self.addEventListener('push', (event) => {
+  console.log('[SW] Push received:', event.data?.text());
   if (!event.data) return;
 
-  const data = event.data.json();
+  let data;
+  try {
+    data = event.data.json();
+  } catch (e) {
+    console.error('[SW] Failed to parse push data:', e);
+    return;
+  }
+
   event.waitUntil(
-    self.registration.showNotification(data.title, {
-      body: data.body,
+    self.registration.showNotification(data.title || 'Axolocal', {
+      body: data.body || '',
       icon: '/icon-192.png',
       badge: '/icon-192.png',
       data: data.url ? { url: data.url } : undefined,

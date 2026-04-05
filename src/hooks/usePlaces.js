@@ -56,7 +56,7 @@ export function usePlaces(groupId) {
 
     // Step 1: fetch all places and user's hidden places
     const [placesRes, hiddenRes] = await Promise.all([
-      supabase.from('places').select('*').eq('group_id', groupId),
+      supabase.from('places').select('*').eq('group_id', groupId).range(0, 4999),
       supabase.from('hidden_places').select('place_id'),
     ]);
 
@@ -80,15 +80,18 @@ export function usePlaces(groupId) {
       supabase
         .from('ratings')
         .select('place_id, user_id, score, note')
-        .in('place_id', placeIds),
+        .in('place_id', placeIds)
+        .range(0, 4999),
       supabase
         .from('check_ins')
         .select('place_id, user_id')
-        .in('place_id', placeIds),
+        .in('place_id', placeIds)
+        .range(0, 4999),
       supabase
         .from('place_tag_votes')
         .select('place_id, tag_id, user_id, vote')
-        .in('place_id', placeIds),
+        .in('place_id', placeIds)
+        .range(0, 4999),
     ]);
 
     const ratingsMap = groupBy(ratingsRes.data || [], 'place_id');

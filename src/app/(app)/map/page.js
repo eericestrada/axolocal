@@ -11,6 +11,7 @@ import { useLocation } from '@/hooks/useLocation';
 import MapView from '@/components/map/MapView';
 import PlaceList from '@/components/places/PlaceList';
 import PlaceSearch from '@/components/map/PlaceSearch';
+import GooglePlacePreview from '@/components/map/GooglePlacePreview';
 import TypeFilterBar from '@/components/filters/TypeFilterBar';
 import FunctionTagChips from '@/components/filters/FunctionTagChips';
 import VisitedToggle from '@/components/filters/VisitedToggle';
@@ -25,6 +26,7 @@ export default function MapPage() {
   const location = useLocation();
   const [useCaseTags, setUseCaseTags] = useState([]);
   const [viewMode, setViewMode] = useState('map'); // 'map' | 'list'
+  const [previewPlace, setPreviewPlace] = useState(null);
 
   useEffect(() => {
     supabase
@@ -47,6 +49,16 @@ export default function MapPage() {
 
   function handlePlaceSelect(id) {
     router.push(`/places/${id}`);
+  }
+
+  function handleSearchPreview(place) {
+    setPreviewPlace(place);
+  }
+
+  function handlePreviewAdded(placeId) {
+    setPreviewPlace(null);
+    refetch();
+    router.push(`/places/${placeId}`);
   }
 
   async function handleCheckIn(place) {
@@ -137,7 +149,7 @@ export default function MapPage() {
         </div>
 
         {/* Search bar — searches Google Places to find & add new places */}
-        <PlaceSearch location={location} />
+        <PlaceSearch location={location} onPreview={handleSearchPreview} />
 
         {/* Filter bar */}
         <TypeFilterBar
@@ -179,6 +191,15 @@ export default function MapPage() {
           />
         )}
       </div>
+
+      {/* Google Place preview from search */}
+      <GooglePlacePreview
+        place={previewPlace}
+        groupId={group?.id}
+        userId={userId}
+        onClose={() => setPreviewPlace(null)}
+        onAdded={handlePreviewAdded}
+      />
     </div>
   );
 }

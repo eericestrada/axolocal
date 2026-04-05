@@ -1,10 +1,8 @@
 'use client';
 
 import { useState, useRef } from 'react';
-import { useRouter } from 'next/navigation';
 
-export default function PlaceSearch({ location }) {
-  const router = useRouter();
+export default function PlaceSearch({ location, onPreview }) {
   const [query, setQuery] = useState('');
   const [results, setResults] = useState([]);
   const [searching, setSearching] = useState(false);
@@ -47,8 +45,18 @@ export default function PlaceSearch({ location }) {
     setQuery('');
     setResults([]);
     setFocused(false);
-    // Navigate to add page with the Google place ID pre-selected
-    router.push(`/add?placeId=${place.id}&name=${encodeURIComponent(place.displayName?.text || place.name || '')}`);
+    // Show preview of the place instead of navigating to /add
+    if (onPreview) {
+      onPreview({
+        googlePlaceId: place.id,
+        name: place.displayName?.text || place.name || '',
+        address: place.formattedAddress || place.shortFormattedAddress || '',
+        latitude: place.location?.latitude,
+        longitude: place.location?.longitude,
+        primaryType: place.primaryType,
+        googleTypes: place.types || [],
+      });
+    }
   }
 
   function handleBlur() {

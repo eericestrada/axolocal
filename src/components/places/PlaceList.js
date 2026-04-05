@@ -2,7 +2,14 @@
 
 import { PIN_COLORS } from '@/utils/constants';
 
-export default function PlaceList({ places, onSelect }) {
+export default function PlaceList({ places, bundles, onSelect }) {
+  // Build color map from bundles
+  const colorMap = { ...PIN_COLORS };
+  if (bundles) {
+    for (const b of bundles) {
+      colorMap[b.slug] = b.color;
+    }
+  }
   if (places.length === 0) {
     return (
       <div className="flex items-center justify-center h-full p-8">
@@ -20,7 +27,7 @@ export default function PlaceList({ places, onSelect }) {
   return (
     <div className="overflow-y-auto h-full">
       {sorted.map((place) => {
-        const color = PIN_COLORS[place.primary_type] || PIN_COLORS.other;
+        const color = colorMap[place.primary_type] || colorMap.other;
         return (
           <button
             key={place.id}

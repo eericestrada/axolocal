@@ -8,6 +8,7 @@ export function useGroup() {
     group: null,
     members: [],
     userId: null,
+    userRole: null,
     loading: true,
   });
   const supabase = createClient();
@@ -27,7 +28,7 @@ export function useGroup() {
       .single();
 
     if (!membership?.groups) {
-      setState({ group: null, members: [], userId: user.id, loading: false });
+      setState({ group: null, members: [], userId: user.id, userRole: null, loading: false });
       return;
     }
 
@@ -41,6 +42,7 @@ export function useGroup() {
       group: membership.groups,
       members: members || [],
       userId: user.id,
+      userRole: membership.role,
       loading: false,
     });
   }, [supabase]);

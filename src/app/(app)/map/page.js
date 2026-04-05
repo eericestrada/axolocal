@@ -5,6 +5,7 @@ import { useRouter } from 'next/navigation';
 import { createClient } from '@/lib/supabase/client';
 import { useGroup } from '@/hooks/useGroup';
 import { usePlaces } from '@/hooks/usePlaces';
+import { useBundles } from '@/hooks/useBundles';
 import { useFilters, filterPlaces } from '@/hooks/useFilters';
 import { useLocation } from '@/hooks/useLocation';
 import MapView from '@/components/map/MapView';
@@ -18,6 +19,7 @@ export default function MapPage() {
   const supabase = createClient();
   const { group, userId, loading: groupLoading } = useGroup();
   const { places, loading: placesLoading, refetch } = usePlaces(group?.id);
+  const { bundles } = useBundles(group?.id);
   const { filters, dispatch } = useFilters();
   const location = useLocation();
   const [useCaseTags, setUseCaseTags] = useState([]);
@@ -135,6 +137,7 @@ export default function MapPage() {
         <TypeFilterBar
           selectedType={filters.selectedType}
           onSelect={(type) => dispatch({ type: 'SET_TYPE', payload: type })}
+          bundles={bundles}
         />
         <div className="flex items-center gap-2 pb-1">
           <FunctionTagChips
@@ -159,12 +162,14 @@ export default function MapPage() {
             useCaseTags={useCaseTags}
             userLocation={location}
             groupId={group.id}
+            bundles={bundles}
             onPlaceSelect={handlePlaceSelect}
             onCheckIn={handleCheckIn}
           />
         ) : (
           <PlaceList
             places={filteredPlaces}
+            bundles={bundles}
             onSelect={handlePlaceSelect}
           />
         )}

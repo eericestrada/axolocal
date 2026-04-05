@@ -5,21 +5,26 @@ import { useRouter } from 'next/navigation';
 import { Map } from '@vis.gl/react-google-maps';
 import MapProvider from '@/components/map/MapProvider';
 import { useGroup } from '@/hooks/useGroup';
+import { useBundles } from '@/hooks/useBundles';
 import { useLocation } from '@/hooks/useLocation';
-import { DEFAULT_MAP_CENTER, DEFAULT_MAP_ZOOM, SEEDABLE_TYPES } from '@/utils/constants';
+import { DEFAULT_MAP_CENTER, DEFAULT_MAP_ZOOM } from '@/utils/constants';
 
 export default function DiscoverPage() {
   const router = useRouter();
   const { group, loading: groupLoading } = useGroup();
+  const { bundles, loading: bundlesLoading } = useBundles(group?.id);
   const location = useLocation();
 
-  const [selectedType, setSelectedType] = useState(SEEDABLE_TYPES[0]);
+  const [selectedBundleId, setSelectedBundleId] = useState(null);
   const [regionName, setRegionName] = useState('');
   const [estimate, setEstimate] = useState(null);
   const [estimating, setEstimating] = useState(false);
   const [seeding, setSeeding] = useState(false);
   const [result, setResult] = useState(null);
   const boundsRef = useRef(null);
+
+  // Auto-select first bundle once loaded
+  const selectedBundle = bundles.find((b) => b.id === selectedBundleId) || bundles[0];
 
   const center = location.latitude
     ? { lat: location.latitude, lng: location.longitude }
@@ -37,13 +42,12 @@ export default function DiscoverPage() {
       east: ne.lng(),
       west: sw.lng(),
     };
-    // Reset estimate when map moves
     setEstimate(null);
     setResult(null);
   }
 
   async function handleEstimate() {
-    if (!boundsRef.current || !group) return;
+    if (!boundsRef.current || !group || !selectedBundle) return;
     setEstimating(true);
     setEstimate(null);
 
@@ -52,7 +56,8 @@ export default function DiscoverPage() {
       headers: { 'Content-Type': 'application/json' },
       body: JSON.stringify({
         bounds: boundsRef.current,
-        type: selectedType,
+        types: selectedBundle.google_types,
+        bundleSlug: selectedBundle.slug,
         groupId: group.id,
         dryRun: true,
       }),
@@ -68,7 +73,7 @@ export default function DiscoverPage() {
   }
 
   async function handleSeed() {
-    if (!boundsRef.current || !group) return;
+    if (!boundsRef.current || !group || !selectedBundle) return;
     setSeeding(true);
 
     const res = await fetch('/api/places/seed', {
@@ -76,7 +81,8 @@ export default function DiscoverPage() {
       headers: { 'Content-Type': 'application/json' },
       body: JSON.stringify({
         bounds: boundsRef.current,
-        type: selectedType,
+        types: selectedBundle.google_types,
+        bundleSlug: selectedBundle.slug,
         groupId: group.id,
         regionName: regionName.trim() || undefined,
         dryRun: false,
@@ -87,7 +93,7 @@ export default function DiscoverPage() {
     setResult(data);
   }
 
-  if (groupLoading) {
+  if (groupLoading || bundlesLoading) {
     return (
       <div className="flex items-center justify-center h-full">
         <p className="text-gray-500">Loading...</p>
@@ -116,22 +122,23 @@ export default function DiscoverPage() {
       <div className="p-4 border-t border-gray-200 space-y-3">
         <h2 className="text-base font-semibold">Discover Places</h2>
         <p className="text-xs text-gray-500">
-          Pan the map to the area you want to search, then discover.
+          Pan the map to the area you want to search, pick a category, then discover.
         </p>
 
-        {/* Type selector */}
-        <div className="flex gap-2">
-          {SEEDABLE_TYPES.map((type) => (
+        {/* Bundle selector */}
+        <div className="flex gap-2 overflow-x-auto no-scrollbar">
+          {bundles.map((bundle) => (
             <button
-              key={type}
-              onClick={() => setSelectedType(type)}
-              className={`rounded-full px-3 py-1 text-xs font-medium ${
-                selectedType === type
-                  ? 'bg-green-600 text-white'
-                  : 'bg-gray-100 text-gray-700'
-              }`}
+              key={bundle.id}
+              onClick={() => setSelectedBundleId(bundle.id)}
+              className="shrink-0 rounded-full px-3 py-1 text-xs font-medium transition-colors"
+              style={
+                selectedBundle?.id === bundle.id
+                  ? { backgroundColor: bundle.color, color: '#fff' }
+                  : { backgroundColor: '#f3f4f6', color: '#374151' }
+              }
             >
-              {type.charAt(0).toUpperCase() + type.slice(1)}s
+              {bundle.label}
             </button>
           ))}
         </div>
@@ -164,7 +171,7 @@ export default function DiscoverPage() {
         {result && (
           <div className="rounded-lg bg-green-50 p-3 text-sm">
             <p>
-              Found <strong>{result.placesFound}</strong> {selectedType}s.{' '}
+              Found <strong>{result.placesFound}</strong> places.{' '}
               <strong>{result.placesInserted}</strong> new places added.
             </p>
             <button
@@ -180,7 +187,7 @@ export default function DiscoverPage() {
         <div className="flex gap-2">
           <button
             onClick={handleEstimate}
-            disabled={estimating}
+            disabled={estimating || !selectedBundle}
             className="flex-1 rounded-lg border border-gray-300 px-4 py-2 text-sm font-medium hover:bg-gray-50 disabled:opacity-50"
           >
             {estimating ? 'Estimating...' : 'Estimate'}
@@ -190,7 +197,7 @@ export default function DiscoverPage() {
             disabled={seeding || !estimate}
             className="flex-1 rounded-lg bg-green-600 px-4 py-2 text-sm font-medium text-white hover:bg-green-700 disabled:opacity-50"
           >
-            {seeding ? 'Searching...' : `Discover ${selectedType.charAt(0).toUpperCase() + selectedType.slice(1)}s`}
+            {seeding ? 'Searching...' : `Discover ${selectedBundle?.label || ''}`}
           </button>
         </div>
       </div>

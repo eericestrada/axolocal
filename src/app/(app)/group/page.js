@@ -1,11 +1,13 @@
 'use client';
 
 import { useState, useEffect, useCallback } from 'react';
+import Link from 'next/link';
 import { createClient } from '@/lib/supabase/client';
 
 export default function GroupPage() {
   const [group, setGroup] = useState(null);
   const [members, setMembers] = useState([]);
+  const [userRole, setUserRole] = useState(null);
   const [loading, setLoading] = useState(true);
   const [creating, setCreating] = useState(false);
   const [groupName, setGroupName] = useState('');
@@ -26,6 +28,7 @@ export default function GroupPage() {
 
     if (membership?.groups) {
       setGroup(membership.groups);
+      setUserRole(membership.role);
 
       // Load members
       const { data: members } = await supabase
@@ -163,6 +166,24 @@ export default function GroupPage() {
           </button>
         </div>
       </div>
+
+      {/* Admin settings */}
+      {userRole === 'admin' && (
+        <Link
+          href="/settings"
+          className="block mb-6 rounded-lg border border-gray-200 p-4 hover:bg-gray-50"
+        >
+          <div className="flex items-center justify-between">
+            <div>
+              <h2 className="text-sm font-medium">Category Settings</h2>
+              <p className="text-xs text-gray-500">Configure place categories and discovery types</p>
+            </div>
+            <svg className="w-4 h-4 text-gray-400" fill="none" viewBox="0 0 24 24" strokeWidth={2} stroke="currentColor">
+              <path strokeLinecap="round" strokeLinejoin="round" d="M8.25 4.5l7.5 7.5-7.5 7.5" />
+            </svg>
+          </div>
+        </Link>
+      )}
 
       {/* Members list */}
       <h2 className="text-sm font-medium mb-2">

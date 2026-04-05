@@ -3,8 +3,9 @@
 import { AdvancedMarker } from '@vis.gl/react-google-maps';
 import { PIN_COLORS } from '@/utils/constants';
 
-export default function PlacePin({ place, onClick, tagMatch }) {
-  const color = PIN_COLORS[place.primary_type] || PIN_COLORS.other;
+export default function PlacePin({ place, onClick, tagMatch, colorMap }) {
+  const colors = colorMap || PIN_COLORS;
+  const color = colors[place.primary_type] || colors.other || '#3b82f6';
 
   let size, opacity, showRating, showQuestion;
 

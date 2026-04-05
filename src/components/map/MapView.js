@@ -6,7 +6,8 @@ import MapProvider from './MapProvider';
 import PlacePin from './PlacePin';
 import PlaceCard from './PlaceCard';
 import DiscoverHereBanner from './DiscoverHereBanner';
-import { DEFAULT_MAP_CENTER, DEFAULT_MAP_ZOOM, SEEDABLE_TYPES } from '@/utils/constants';
+import { DEFAULT_MAP_CENTER, DEFAULT_MAP_ZOOM, SEEDABLE_TYPES, PIN_COLORS } from '@/utils/constants';
+import { useMemo } from 'react';
 
 
 export default function MapView({
@@ -14,9 +15,21 @@ export default function MapView({
   useCaseTags,
   userLocation,
   groupId,
+  bundles,
   onPlaceSelect,
   onCheckIn,
 }) {
+  // Build color map from bundles (slug -> color), fall back to PIN_COLORS
+  const colorMap = useMemo(() => {
+    const map = { ...PIN_COLORS };
+    if (bundles) {
+      for (const b of bundles) {
+        map[b.slug] = b.color;
+      }
+    }
+    return map;
+  }, [bundles]);
+
   const [selectedPlace, setSelectedPlace] = useState(null);
   const [showDiscover, setShowDiscover] = useState(false);
   const [discoverLoading, setDiscoverLoading] = useState(false);
@@ -139,6 +152,7 @@ export default function MapView({
               place={place}
               onClick={handlePinClick}
               tagMatch={place.tagMatch}
+              colorMap={colorMap}
             />
           ))}
         </Map>

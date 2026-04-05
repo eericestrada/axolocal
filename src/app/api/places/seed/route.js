@@ -37,7 +37,7 @@ function computeGrid(bounds) {
   return { rows, cols, points, totalCells: rows * cols };
 }
 
-async function searchNearby(center, type) {
+async function searchNearby(center, includedTypes) {
   const res = await fetch('https://places.googleapis.com/v1/places:searchNearby', {
     method: 'POST',
     headers: {
@@ -46,7 +46,7 @@ async function searchNearby(center, type) {
       'X-Goog-FieldMask': 'places.id,places.displayName,places.formattedAddress,places.location,places.types,places.primaryType',
     },
     body: JSON.stringify({
-      includedTypes: [type],
+      includedTypes,
       locationRestriction: {
         circle: {
           center: { latitude: center.latitude, longitude: center.longitude },
@@ -74,11 +74,14 @@ export async function POST(request) {
     return NextResponse.json({ error: 'Unauthorized' }, { status: 401 });
   }
 
-  const { bounds, type, groupId, regionName, dryRun } = await request.json();
+  const { bounds, type, types, bundleSlug, groupId, regionName, dryRun } = await request.json();
 
-  if (!bounds || !type || !groupId) {
+  // Support both old single-type and new multi-type format
+  const includedTypes = types || (type ? [type] : null);
+
+  if (!bounds || !includedTypes || !groupId) {
     return NextResponse.json(
-      { error: 'bounds, type, and groupId are required' },
+      { error: 'bounds, types (or type), and groupId are required' },
       { status: 400 }
     );
   }
@@ -116,7 +119,7 @@ export async function POST(request) {
 
   // Sequential to respect rate limits
   for (const point of grid.points) {
-    const results = await searchNearby(point, type);
+    const results = await searchNearby(point, includedTypes);
     for (const place of results) {
       if (!seen.has(place.id)) {
         seen.add(place.id);
@@ -184,7 +187,7 @@ export async function POST(request) {
     user_id: user.id,
     action_type: 'discovery',
     metadata: {
-      type,
+      bundleSlug: bundleSlug || type,
       regionName: region?.name,
       placesFound: allPlaces.length,
       placesInserted: insertedCount,

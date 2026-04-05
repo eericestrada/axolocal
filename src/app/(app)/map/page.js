@@ -163,7 +163,6 @@ export default function MapPage() {
             places={filteredPlaces}
             useCaseTags={useCaseTags}
             userLocation={location}
-            groupId={group.id}
             bundles={bundles}
             onPlaceSelect={handlePlaceSelect}
             onCheckIn={handleCheckIn}

@@ -23,7 +23,7 @@ export default function PlaceDetail({ placeId }) {
   const [userRole, setUserRole] = useState(null);
   const [loading, setLoading] = useState(true);
   const [showRatingForm, setShowRatingForm] = useState(false);
-  const [showAttributeForm, setShowAttributeForm] = useState(false);
+  const [showAttributeForm, setShowAttributeForm] = useState(true);
   const [editingName, setEditingName] = useState(false);
   const [nameInput, setNameInput] = useState('');
   const [nicknameInput, setNicknameInput] = useState('');
@@ -327,7 +327,7 @@ export default function PlaceDetail({ placeId }) {
             onClick={() => setShowAttributeForm(!showAttributeForm)}
             className="text-xs text-green-600 font-medium"
           >
-            {showAttributeForm ? 'Hide' : 'Edit My Answers'}
+            {showAttributeForm ? 'Collapse' : 'Edit My Answers'}
           </button>
         </div>
         {showAttributeForm && (
@@ -423,17 +423,17 @@ export default function PlaceDetail({ placeId }) {
       </div>
 
       {/* Place actions */}
-      <div className="p-4 space-y-2">
+      <div className="p-4 flex gap-4">
         <button
           onClick={handleHidePlace}
-          className="block text-xs text-gray-500 hover:text-gray-700"
+          className="text-xs text-gray-500 hover:text-gray-700"
         >
-          Hide this place from my view
+          Hide from my view
         </button>
         {userRole === 'admin' && (
           <button
             onClick={handleDeletePlace}
-            className="block text-xs text-red-500 hover:text-red-700"
+            className="text-xs text-red-500 hover:text-red-700"
           >
             Delete for entire group
           </button>

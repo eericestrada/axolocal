@@ -37,7 +37,9 @@ function computeGrid(bounds) {
   return { rows, cols, points, totalCells: rows * cols };
 }
 
-async function searchNearby(center, includedTypes) {
+const MAX_TYPES_PER_REQUEST = 50;
+
+async function searchNearbyBatch(center, typeBatch) {
   const res = await fetch('https://places.googleapis.com/v1/places:searchNearby', {
     method: 'POST',
     headers: {
@@ -46,7 +48,7 @@ async function searchNearby(center, includedTypes) {
       'X-Goog-FieldMask': 'places.id,places.displayName,places.formattedAddress,places.location,places.types,places.primaryType',
     },
     body: JSON.stringify({
-      includedTypes,
+      includedTypes: typeBatch,
       locationRestriction: {
         circle: {
           center: { latitude: center.latitude, longitude: center.longitude },
@@ -65,6 +67,27 @@ async function searchNearby(center, includedTypes) {
   }
 
   return data.places || [];
+}
+
+async function searchNearby(center, includedTypes) {
+  // Google limits includedTypes to 50 per request; batch if needed
+  if (includedTypes.length <= MAX_TYPES_PER_REQUEST) {
+    return searchNearbyBatch(center, includedTypes);
+  }
+
+  const allResults = [];
+  const seen = new Set();
+  for (let i = 0; i < includedTypes.length; i += MAX_TYPES_PER_REQUEST) {
+    const batch = includedTypes.slice(i, i + MAX_TYPES_PER_REQUEST);
+    const results = await searchNearbyBatch(center, batch);
+    for (const place of results) {
+      if (!seen.has(place.id)) {
+        seen.add(place.id);
+        allResults.push(place);
+      }
+    }
+  }
+  return allResults;
 }
 
 export async function POST(request) {
@@ -105,10 +128,13 @@ export async function POST(request) {
 
   // Dry run — return estimate only
   if (dryRun) {
-    const estimatedCost = ((grid.totalCells / 1000) * COST_PER_1000_REQUESTS).toFixed(2);
+    const typeBatches = Math.ceil(includedTypes.length / MAX_TYPES_PER_REQUEST);
+    const totalCalls = grid.totalCells * typeBatches;
+    const estimatedCost = ((totalCalls / 1000) * COST_PER_1000_REQUESTS).toFixed(2);
     return NextResponse.json({
-      estimatedCalls: grid.totalCells,
+      estimatedCalls: totalCalls,
       gridSize: `${grid.rows}x${grid.cols}`,
+      typeBatches,
       estimatedCost: `$${estimatedCost}`,
     });
   }

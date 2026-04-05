@@ -15,7 +15,7 @@ export default function DiscoverPage() {
   const { bundles, loading: bundlesLoading } = useBundles(group?.id);
   const location = useLocation();
 
-  const [selectedBundleId, setSelectedBundleId] = useState(null);
+  const [selectedBundleId, setSelectedBundleId] = useState('all');
   const [regionName, setRegionName] = useState('');
   const [estimate, setEstimate] = useState(null);
   const [estimating, setEstimating] = useState(false);
@@ -23,8 +23,16 @@ export default function DiscoverPage() {
   const [result, setResult] = useState(null);
   const boundsRef = useRef(null);
 
-  // Auto-select first bundle once loaded
-  const selectedBundle = bundles.find((b) => b.id === selectedBundleId) || bundles[0];
+  // "All" combines every bundle's types; otherwise pick the selected one
+  const isAll = selectedBundleId === 'all';
+  const selectedBundle = isAll
+    ? null
+    : bundles.find((b) => b.id === selectedBundleId) || bundles[0];
+
+  // Combine all bundle types (deduplicated) for "All" mode
+  const allTypes = isAll
+    ? [...new Set(bundles.flatMap((b) => b.google_types || []))]
+    : selectedBundle?.google_types || [];
 
   const center = location.latitude
     ? { lat: location.latitude, lng: location.longitude }
@@ -56,8 +64,8 @@ export default function DiscoverPage() {
       headers: { 'Content-Type': 'application/json' },
       body: JSON.stringify({
         bounds: boundsRef.current,
-        types: selectedBundle.google_types,
-        bundleSlug: selectedBundle.slug,
+        types: allTypes,
+        bundleSlug: isAll ? 'all' : selectedBundle?.slug,
         groupId: group.id,
         dryRun: true,
       }),
@@ -81,8 +89,8 @@ export default function DiscoverPage() {
       headers: { 'Content-Type': 'application/json' },
       body: JSON.stringify({
         bounds: boundsRef.current,
-        types: selectedBundle.google_types,
-        bundleSlug: selectedBundle.slug,
+        types: allTypes,
+        bundleSlug: isAll ? 'all' : selectedBundle?.slug,
         groupId: group.id,
         regionName: regionName.trim() || undefined,
         dryRun: false,
@@ -127,6 +135,16 @@ export default function DiscoverPage() {
 
         {/* Bundle selector */}
         <div className="flex gap-2 overflow-x-auto no-scrollbar">
+          <button
+            onClick={() => setSelectedBundleId('all')}
+            className={`shrink-0 rounded-full px-3 py-1 text-xs font-medium transition-colors ${
+              isAll
+                ? 'bg-gray-800 text-white'
+                : 'bg-gray-100 text-gray-700 hover:bg-gray-200'
+            }`}
+          >
+            All Categories
+          </button>
           {bundles.map((bundle) => (
             <button
               key={bundle.id}
@@ -187,7 +205,7 @@ export default function DiscoverPage() {
         <div className="flex gap-2">
           <button
             onClick={handleEstimate}
-            disabled={estimating || !selectedBundle}
+            disabled={estimating || allTypes.length === 0}
             className="flex-1 rounded-lg border border-gray-300 px-4 py-2 text-sm font-medium hover:bg-gray-50 disabled:opacity-50"
           >
             {estimating ? 'Estimating...' : 'Estimate'}
@@ -197,7 +215,7 @@ export default function DiscoverPage() {
             disabled={seeding || !estimate}
             className="flex-1 rounded-lg bg-green-600 px-4 py-2 text-sm font-medium text-white hover:bg-green-700 disabled:opacity-50"
           >
-            {seeding ? 'Searching...' : `Discover ${selectedBundle?.label || ''}`}
+            {seeding ? 'Searching...' : `Discover ${isAll ? 'All' : selectedBundle?.label || ''}`}
           </button>
         </div>
       </div>

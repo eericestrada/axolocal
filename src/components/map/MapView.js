@@ -1,7 +1,7 @@
 'use client';
 
 import { useState, useCallback, useMemo, useEffect } from 'react';
-import { Map, useMap } from '@vis.gl/react-google-maps';
+import { Map, useMap, AdvancedMarker } from '@vis.gl/react-google-maps';
 import MapProvider from './MapProvider';
 import PlacePin from './PlacePin';
 import PlaceCard from './PlaceCard';
@@ -65,6 +65,18 @@ function MapInner({
             colorMap={colorMap}
           />
         ))}
+
+        {/* Temporary pin for searched place */}
+        {panTo && (
+          <AdvancedMarker position={{ lat: panTo.lat, lng: panTo.lng }}>
+            <div className="flex flex-col items-center">
+              <div className="bg-green-600 text-white text-xs font-semibold px-2 py-1 rounded-lg shadow-lg whitespace-nowrap mb-1">
+                {panTo.name || 'Searched place'}
+              </div>
+              <div className="w-4 h-4 bg-green-600 rounded-full border-2 border-white shadow-lg animate-pulse" />
+            </div>
+          </AdvancedMarker>
+        )}
       </Map>
 
       <PlaceCard

@@ -57,12 +57,13 @@ export default function MapPage() {
     // Pan map to the searched place
     if (place.latitude && place.longitude) {
       setViewMode('map');
-      setPanTo({ lat: place.latitude, lng: place.longitude });
+      setPanTo({ lat: place.latitude, lng: place.longitude, name: place.name });
     }
   }
 
   function handlePreviewAdded(placeId) {
     setPreviewPlace(null);
+    setPanTo(null);
     refetch();
     router.push(`/places/${placeId}`);
   }
@@ -204,7 +205,7 @@ export default function MapPage() {
         place={previewPlace}
         groupId={group?.id}
         userId={userId}
-        onClose={() => setPreviewPlace(null)}
+        onClose={() => { setPreviewPlace(null); setPanTo(null); }}
         onAdded={handlePreviewAdded}
       />
     </div>

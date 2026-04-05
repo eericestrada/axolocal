@@ -17,7 +17,7 @@ import VisitedToggle from '@/components/filters/VisitedToggle';
 export default function MapPage() {
   const router = useRouter();
   const supabase = createClient();
-  const { group, userId, loading: groupLoading } = useGroup();
+  const { group, userId, userRole, loading: groupLoading } = useGroup();
   const { places, loading: placesLoading, refetch } = usePlaces(group?.id);
   const { bundles } = useBundles(group?.id);
   const { filters, dispatch } = useFilters();
@@ -121,16 +121,18 @@ export default function MapPage() {
             {filteredPlaces.length} place{filteredPlaces.length !== 1 ? 's' : ''}
           </span>
 
-          {/* Discover button */}
-          <button
-            onClick={() => router.push('/discover')}
-            className="flex items-center gap-1.5 rounded-full bg-green-600 px-3 py-1 text-xs font-medium text-white hover:bg-green-700"
-          >
-            <svg className="w-3.5 h-3.5" fill="none" viewBox="0 0 24 24" strokeWidth={2} stroke="currentColor">
-              <path strokeLinecap="round" strokeLinejoin="round" d="M21 21l-5.197-5.197m0 0A7.5 7.5 0 105.196 5.196a7.5 7.5 0 0010.607 10.607z" />
-            </svg>
-            Discover
-          </button>
+          {/* Discover button (admin only) */}
+          {userRole === 'admin' && (
+            <button
+              onClick={() => router.push('/discover')}
+              className="flex items-center gap-1.5 rounded-full bg-green-600 px-3 py-1 text-xs font-medium text-white hover:bg-green-700"
+            >
+              <svg className="w-3.5 h-3.5" fill="none" viewBox="0 0 24 24" strokeWidth={2} stroke="currentColor">
+                <path strokeLinecap="round" strokeLinejoin="round" d="M21 21l-5.197-5.197m0 0A7.5 7.5 0 105.196 5.196a7.5 7.5 0 0010.607 10.607z" />
+              </svg>
+              Discover
+            </button>
+          )}
         </div>
 
         {/* Filter bar */}

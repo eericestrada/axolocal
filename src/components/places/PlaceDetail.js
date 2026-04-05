@@ -146,6 +146,12 @@ export default function PlaceDetail({ placeId }) {
     fetchData();
   }
 
+  async function handleDeletePlace() {
+    if (!confirm('Remove this place? This will delete all ratings, check-ins, and tag votes for it.')) return;
+    await supabase.from('places').delete().eq('id', placeId);
+    router.push('/map');
+  }
+
   async function handleDeleteRating() {
     if (!confirm('Delete your rating?')) return;
     await supabase
@@ -364,6 +370,16 @@ export default function PlaceDetail({ placeId }) {
         ) : (
           <p className="text-xs text-gray-400">No check-ins yet</p>
         )}
+      </div>
+
+      {/* Delete place */}
+      <div className="p-4">
+        <button
+          onClick={handleDeletePlace}
+          className="text-xs text-red-500 hover:text-red-700"
+        >
+          Remove this place
+        </button>
       </div>
 
       {/* Sticky action bar */}

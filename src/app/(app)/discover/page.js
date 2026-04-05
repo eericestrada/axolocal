@@ -70,7 +70,7 @@ export default function DiscoverPage() {
   }
 
   async function handleEstimate() {
-    if (!boundsRef.current || !group || !selectedBundle) return;
+    if (!boundsRef.current || !group || allTypes.length === 0) return;
     setEstimating(true);
     setEstimate(null);
 
@@ -96,7 +96,7 @@ export default function DiscoverPage() {
   }
 
   async function handleSeed() {
-    if (!boundsRef.current || !group || !selectedBundle) return;
+    if (!boundsRef.current || !group || allTypes.length === 0) return;
     setSeeding(true);
 
     const res = await fetch('/api/places/seed', {

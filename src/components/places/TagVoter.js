@@ -3,7 +3,7 @@
 import { useState } from 'react';
 import { createClient } from '@/lib/supabase/client';
 
-export default function TagVoter({ placeId, userId, tagSummary, useCaseTags, onVote }) {
+export default function TagVoter({ placeId, userId, tagSummary, useCaseTags, placeType, onVote }) {
   const [voting, setVoting] = useState(null);
   const supabase = createClient();
 
@@ -46,7 +46,10 @@ export default function TagVoter({ placeId, userId, tagSummary, useCaseTags, onV
 
   return (
     <div className="flex flex-wrap gap-2">
-      {useCaseTags.map((tag) => {
+      {useCaseTags.filter((tag) => {
+        if (!tag.applies_to) return true; // null = all types
+        return tag.applies_to.includes(placeType);
+      }).map((tag) => {
         const userVote = getUserVote(tag.id);
         const summary = tagSummary?.[tag.id];
         const total = summary?.total || 0;

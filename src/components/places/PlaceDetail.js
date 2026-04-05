@@ -287,6 +287,7 @@ export default function PlaceDetail({ placeId }) {
           userId={userId}
           tagSummary={tagSummary}
           useCaseTags={useCaseTags}
+          placeType={place.primary_type}
           onVote={fetchData}
         />
       </div>

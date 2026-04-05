@@ -208,7 +208,10 @@ export default function AddPlacePage() {
             What&apos;s this place good for?
           </label>
           <div className="flex flex-wrap gap-2">
-            {useCaseTags.map((tag) => {
+            {useCaseTags.filter((tag) => {
+              if (!tag.applies_to) return true;
+              return tag.applies_to.includes(selected.primaryType);
+            }).map((tag) => {
               const vote = tagVotes[tag.id];
               let chipClass;
               if (vote === true) chipClass = 'bg-green-600 text-white';

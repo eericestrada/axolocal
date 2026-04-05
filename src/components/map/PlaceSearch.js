@@ -45,17 +45,9 @@ export default function PlaceSearch({ location, onPreview }) {
     setQuery('');
     setResults([]);
     setFocused(false);
-    // Show preview of the place instead of navigating to /add
+    // Show preview — place is already normalized by /api/places/search
     if (onPreview) {
-      onPreview({
-        googlePlaceId: place.id,
-        name: place.displayName?.text || place.name || '',
-        address: place.formattedAddress || place.shortFormattedAddress || '',
-        latitude: place.location?.latitude,
-        longitude: place.location?.longitude,
-        primaryType: place.primaryType,
-        googleTypes: place.types || [],
-      });
+      onPreview(place);
     }
   }
 
@@ -97,7 +89,7 @@ export default function PlaceSearch({ location, onPreview }) {
         <div className="absolute left-3 right-3 top-full mt-1 bg-white rounded-lg shadow-lg border border-gray-200 z-50 max-h-60 overflow-y-auto">
           {results.map((place) => (
             <button
-              key={place.id}
+              key={place.googlePlaceId}
               onMouseDown={() => handleSelect(place)}
               className="w-full flex items-start gap-2 px-3 py-2.5 hover:bg-gray-50 text-left border-b border-gray-50 last:border-b-0"
             >
@@ -107,10 +99,10 @@ export default function PlaceSearch({ location, onPreview }) {
               </svg>
               <div className="min-w-0">
                 <p className="text-sm font-medium truncate">
-                  {place.displayName?.text || place.name}
+                  {place.name}
                 </p>
                 <p className="text-xs text-gray-500 truncate">
-                  {place.formattedAddress || place.shortFormattedAddress || ''}
+                  {place.address}
                 </p>
               </div>
             </button>

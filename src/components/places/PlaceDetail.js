@@ -22,7 +22,6 @@ export default function PlaceDetail({ placeId }) {
   const [userId, setUserId] = useState(null);
   const [userRole, setUserRole] = useState(null);
   const [loading, setLoading] = useState(true);
-  const [showRatingForm, setShowRatingForm] = useState(false);
   const [showAttributeForm, setShowAttributeForm] = useState(true);
   const [editingName, setEditingName] = useState(false);
   const [nameInput, setNameInput] = useState('');
@@ -335,42 +334,27 @@ export default function PlaceDetail({ placeId }) {
             placeId={placeId}
             userId={userId}
             primaryType={place.primary_type}
-            onSave={() => {
-              setShowAttributeForm(false);
-              fetchData();
-            }}
+            onSave={fetchData}
           />
         )}
       </div>
 
-      {/* Ratings */}
+      {/* My Rating */}
       <div className="p-4 border-b border-gray-100">
-        <div className="flex items-center justify-between mb-2">
-          <h2 className="text-sm font-medium">
-            Ratings ({ratings.length})
-          </h2>
-          <button
-            onClick={() => setShowRatingForm(!showRatingForm)}
-            className="text-xs text-green-600 font-medium"
-          >
-            {myRating ? 'Edit My Rating' : 'Rate This Place'}
-          </button>
-        </div>
+        <h2 className="text-sm font-medium mb-2">My Rating</h2>
+        <RatingForm
+          placeId={placeId}
+          userId={userId}
+          existingRating={myRating}
+          onSave={fetchData}
+        />
+      </div>
 
-        {showRatingForm && (
-          <div className="mb-3">
-            <RatingForm
-              placeId={placeId}
-              userId={userId}
-              existingRating={myRating}
-              onSave={() => {
-                setShowRatingForm(false);
-                fetchData();
-              }}
-            />
-          </div>
-        )}
-
+      {/* Group Ratings */}
+      <div className="p-4 border-b border-gray-100">
+        <h2 className="text-sm font-medium mb-2">
+          Group Ratings ({ratings.length})
+        </h2>
         <div className="space-y-2">
           {ratings.map((r) => (
             <div key={r.id} className="flex items-center gap-2">
@@ -459,12 +443,6 @@ export default function PlaceDetail({ placeId }) {
           className="flex-1 rounded-lg bg-green-600 px-4 py-2 text-sm font-medium text-white hover:bg-green-700 disabled:opacity-50"
         >
           {checkingIn ? 'Checking in...' : 'Check In'}
-        </button>
-        <button
-          onClick={() => setShowRatingForm(true)}
-          className="flex-1 rounded-lg border border-gray-300 px-4 py-2 text-sm font-medium hover:bg-gray-50"
-        >
-          {myRating ? 'Edit Rating' : 'Rate'}
         </button>
       </div>
     </div>

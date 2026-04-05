@@ -82,7 +82,7 @@ export default function MapView({
     }
 
     const confirmed = confirm(
-      `This will search a ${estimate.gridSize} grid (${estimate.estimatedCalls} API calls, ~${estimate.estimatedCost}). Continue?`
+      `This will search a ${estimate.gridSize} grid (${estimate.estimatedCalls} API calls, ~${estimate.estimatedCost}).\n\nNote: Google gives $200/month free credit — this is well within that limit.\n\nContinue?`
     );
 
     if (!confirmed) {

@@ -154,6 +154,9 @@ export default function DiscoverPage() {
             <p>
               Estimated cost: <strong>{estimate.estimatedCost}</strong>
             </p>
+            <p className="text-xs text-gray-500 mt-1">
+              Google provides $200/mo free credit — well within that limit.
+            </p>
           </div>
         )}
 

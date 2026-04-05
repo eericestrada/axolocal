@@ -27,7 +27,7 @@ export const DEFAULT_MAP_CENTER = { lat: 29.4241, lng: -98.4936 };
 export const DEFAULT_MAP_ZOOM = 13;
 
 // Seeding config
-export const GRID_SPACING_MILES = 1.0;
+export const GRID_SPACING_MILES = 2.0;
 export const MAX_GRID_CELLS = 900;
 export const SEED_RADIUS_METERS = 1200;
 

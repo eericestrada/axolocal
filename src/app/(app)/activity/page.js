@@ -67,10 +67,12 @@ export default function ActivityPage() {
         .from('activity')
         .select('*, profiles(display_name), places(name, nickname)')
         .eq('group_id', group.id)
+        .in('action_type', ['check_in', 'rating', 'add_place'])
         .order('created_at', { ascending: false })
         .range(0, 49);
 
-      setItems(data || []);
+      // Filter out entries where the place was deleted
+      setItems((data || []).filter((d) => d.places));
       setLoading(false);
     }
     load();

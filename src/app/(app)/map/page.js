@@ -1,6 +1,6 @@
 'use client';
 
-import { useState, useEffect, useCallback } from 'react';
+import { useState, useEffect, useCallback, useRef } from 'react';
 import { useRouter } from 'next/navigation';
 import { createClient } from '@/lib/supabase/client';
 import { useGroup } from '@/hooks/useGroup';
@@ -10,6 +10,7 @@ import { useFilters, filterPlaces } from '@/hooks/useFilters';
 import { useLocation } from '@/hooks/useLocation';
 import MapView from '@/components/map/MapView';
 import PlaceList from '@/components/places/PlaceList';
+import PlaceSearch from '@/components/map/PlaceSearch';
 import TypeFilterBar from '@/components/filters/TypeFilterBar';
 import FunctionTagChips from '@/components/filters/FunctionTagChips';
 import VisitedToggle from '@/components/filters/VisitedToggle';
@@ -135,16 +136,8 @@ export default function MapPage() {
           )}
         </div>
 
-        {/* Search bar */}
-        <div className="px-3 pt-1.5">
-          <input
-            type="text"
-            value={filters.searchQuery}
-            onChange={(e) => dispatch({ type: 'SET_SEARCH', payload: e.target.value })}
-            placeholder="Search places..."
-            className="w-full rounded-lg border border-gray-200 bg-gray-50 px-3 py-1.5 text-sm placeholder-gray-400 focus:outline-none focus:ring-2 focus:ring-green-600 focus:border-transparent"
-          />
-        </div>
+        {/* Search bar — searches Google Places to find & add new places */}
+        <PlaceSearch location={location} />
 
         {/* Filter bar */}
         <TypeFilterBar

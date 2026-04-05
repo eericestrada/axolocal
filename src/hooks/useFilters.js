@@ -9,7 +9,6 @@ const initialState = {
   selectedTags: [],
   showUnvisited: true,
   tagFilterExpanded: false,
-  searchQuery: '',
 };
 
 function reducer(state, action) {
@@ -33,8 +32,6 @@ function reducer(state, action) {
       return { ...state, showUnvisited: !state.showUnvisited };
     case 'TOGGLE_TAG_FILTER':
       return { ...state, tagFilterExpanded: !state.tagFilterExpanded };
-    case 'SET_SEARCH':
-      return { ...state, searchQuery: action.payload };
     case 'CLEAR_ALL':
       return { ...initialState };
     case 'RESTORE':
@@ -50,17 +47,6 @@ function reducer(state, action) {
  */
 export function filterPlaces(places, filters) {
   let result = places;
-
-  // Layer 0: search filter
-  if (filters.searchQuery) {
-    const q = filters.searchQuery.toLowerCase();
-    result = result.filter(
-      (p) =>
-        (p.name && p.name.toLowerCase().includes(q)) ||
-        (p.nickname && p.nickname.toLowerCase().includes(q)) ||
-        (p.address && p.address.toLowerCase().includes(q))
-    );
-  }
 
   // Layer 1: type filter
   if (filters.selectedType) {

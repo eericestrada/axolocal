@@ -152,7 +152,7 @@ export default function ProfilePage() {
                 onClick={() => router.push(`/places/${v.place_id}`)}
                 className="w-full flex items-center gap-3 px-4 py-2.5 hover:bg-gray-50 text-left"
               >
-                <span className="text-green-600 text-sm">\u2713</span>
+                <span className="text-green-600 text-sm">✓</span>
                 <p className="text-sm truncate">
                   {v.places?.nickname || v.places?.name || 'Unknown'}
                 </p>

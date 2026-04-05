@@ -13,11 +13,21 @@ export default function AttributeForm({ placeId, userId, primaryType, onSave }) 
 
   useEffect(() => {
     async function load() {
-      const { data: attrs } = await supabase
+      // Try type-specific attributes first, fall back to universal defaults
+      let { data: attrs } = await supabase
         .from('category_attributes')
         .select('*')
         .eq('primary_type', primaryType)
         .order('sort_order');
+
+      if (!attrs || attrs.length === 0) {
+        const { data: fallback } = await supabase
+          .from('category_attributes')
+          .select('*')
+          .eq('primary_type', '_default')
+          .order('sort_order');
+        attrs = fallback;
+      }
 
       setAttributes(attrs || []);
 

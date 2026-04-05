@@ -101,9 +101,6 @@ export default function PlaceList({ places, bundles, onSelect }) {
                   {place.checkInCount} visit{place.checkInCount !== 1 ? 's' : ''}
                 </p>
               )}
-              {place.stage === 1 && (
-                <p className="text-[10px] text-gray-400">Unexplored</p>
-              )}
             </div>
           </button>
         );

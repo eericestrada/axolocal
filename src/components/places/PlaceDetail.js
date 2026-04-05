@@ -132,12 +132,6 @@ export default function PlaceDetail({ placeId }) {
   const hasTagYes = tagVotes.some((v) => v.vote === true);
   const stage =
     hasTagYes ? 3 : ratings.length > 0 || checkIns.length > 0 || visited ? 2 : 1;
-  const stageText =
-    stage === 1
-      ? 'Not yet visited'
-      : stage === 2
-        ? `Visited by ${new Set(checkIns.map((c) => c.user_id)).size || ratings.length} member(s)`
-        : 'Fully characterized';
 
   async function handleCheckIn() {
     setCheckingIn(true);
@@ -288,7 +282,6 @@ export default function PlaceDetail({ placeId }) {
               </span>
             </div>
           )}
-          <span className="text-xs text-gray-400">{stageText}</span>
         </div>
       </div>
 

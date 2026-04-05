@@ -4,7 +4,7 @@ import { useState, useCallback } from 'react';
 import { createClient } from '@/lib/supabase/client';
 import StarRating from '@/components/ui/StarRating';
 
-export default function RatingForm({ placeId, userId, existingRating, onSave }) {
+export default function RatingForm({ placeId, userId, groupId, existingRating, onSave }) {
   const [score, setScore] = useState(existingRating?.score || 0);
   const [note, setNote] = useState(existingRating?.note || '');
   const supabase = createClient();
@@ -20,8 +20,17 @@ export default function RatingForm({ placeId, userId, existingRating, onSave }) 
       },
       { onConflict: 'place_id,user_id' }
     );
+    if (groupId) {
+      await supabase.from('activity').insert({
+        group_id: groupId,
+        user_id: userId,
+        place_id: placeId,
+        action_type: 'rating',
+        metadata: { score: newScore },
+      });
+    }
     onSave?.();
-  }, [placeId, userId, supabase, onSave]);
+  }, [placeId, userId, groupId, supabase, onSave]);
 
   function handleScoreChange(newScore) {
     setScore(newScore);

@@ -1,4 +1,5 @@
 import { Geist, Geist_Mono } from 'next/font/google';
+import InstallPrompt from '@/components/ui/InstallPrompt';
 import './globals.css';
 
 const geistSans = Geist({
@@ -45,6 +46,7 @@ export default function RootLayout({ children }) {
       </head>
       <body className="h-full flex flex-col">
         {children}
+        <InstallPrompt />
         <script
           dangerouslySetInnerHTML={{
             __html: `

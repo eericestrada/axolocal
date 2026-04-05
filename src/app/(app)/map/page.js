@@ -135,6 +135,17 @@ export default function MapPage() {
           )}
         </div>
 
+        {/* Search bar */}
+        <div className="px-3 pt-1.5">
+          <input
+            type="text"
+            value={filters.searchQuery}
+            onChange={(e) => dispatch({ type: 'SET_SEARCH', payload: e.target.value })}
+            placeholder="Search places..."
+            className="w-full rounded-lg border border-gray-200 bg-gray-50 px-3 py-1.5 text-sm placeholder-gray-400 focus:outline-none focus:ring-2 focus:ring-green-600 focus:border-transparent"
+          />
+        </div>
+
         {/* Filter bar */}
         <TypeFilterBar
           selectedType={filters.selectedType}

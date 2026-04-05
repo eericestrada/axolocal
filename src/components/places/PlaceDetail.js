@@ -338,6 +338,7 @@ export default function PlaceDetail({ placeId }) {
         <RatingForm
           placeId={placeId}
           userId={userId}
+          groupId={place.group_id}
           existingRating={myRating}
           onSave={fetchData}
         />

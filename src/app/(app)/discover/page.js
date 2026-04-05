@@ -105,7 +105,7 @@ export default function DiscoverPage() {
             defaultZoom={DEFAULT_MAP_ZOOM}
             gestureHandling="greedy"
             disableDefaultUI
-            mapId="axolocal-discover"
+            mapId="81fa7c449cfa673e1ee5e17e"
             onBoundsChanged={handleBoundsChanged}
             className="w-full h-full"
           />

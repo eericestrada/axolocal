@@ -79,6 +79,25 @@ function MapInner({
         )}
       </Map>
 
+      {/* My location button */}
+      {userLocation?.latitude && (
+        <button
+          onClick={() => {
+            if (map) {
+              map.panTo({ lat: userLocation.latitude, lng: userLocation.longitude });
+              map.setZoom(15);
+            }
+          }}
+          className="absolute bottom-24 right-3 z-10 w-10 h-10 bg-white rounded-full shadow-lg border border-gray-200 flex items-center justify-center hover:bg-gray-50 active:bg-gray-100"
+          aria-label="Go to my location"
+        >
+          <svg className="w-5 h-5 text-green-600" fill="none" viewBox="0 0 24 24" strokeWidth={2} stroke="currentColor">
+            <path strokeLinecap="round" strokeLinejoin="round" d="M12 12m-3 0a3 3 0 1 0 6 0a3 3 0 1 0-6 0" />
+            <path strokeLinecap="round" strokeLinejoin="round" d="M12 2v3m0 14v3m10-10h-3M5 12H2" />
+          </svg>
+        </button>
+      )}
+
       <PlaceCard
         place={selectedPlace}
         useCaseTags={useCaseTags}

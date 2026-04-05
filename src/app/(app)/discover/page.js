@@ -131,6 +131,7 @@ export default function DiscoverPage() {
         <h2 className="text-base font-semibold">Discover Places</h2>
         <p className="text-xs text-gray-500">
           Pan the map to the area you want to search, pick a category, then discover.
+          Re-searching an area costs the same — results are deduplicated but API calls are not.
         </p>
 
         {/* Bundle selector */}
@@ -160,6 +161,14 @@ export default function DiscoverPage() {
             </button>
           ))}
         </div>
+
+        {isAll && (
+          <p className="text-xs text-amber-600 bg-amber-50 rounded-lg px-3 py-2">
+            Tip: "All Categories" works best in suburban/spread-out areas. For dense areas
+            (downtown), search individual categories for more complete results — each API
+            call returns max 20 places regardless of how many exist.
+          </p>
+        )}
 
         {/* Region name */}
         <input

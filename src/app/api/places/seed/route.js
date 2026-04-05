@@ -57,12 +57,13 @@ async function searchNearby(center, type) {
     }),
   });
 
+  const data = await res.json();
+
   if (!res.ok) {
-    console.error('Nearby search error:', await res.text());
+    console.error('Nearby search error:', res.status, JSON.stringify(data));
     return [];
   }
 
-  const data = await res.json();
   return data.places || [];
 }
 

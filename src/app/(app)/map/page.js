@@ -27,6 +27,7 @@ export default function MapPage() {
   const [useCaseTags, setUseCaseTags] = useState([]);
   const [viewMode, setViewMode] = useState('map'); // 'map' | 'list'
   const [previewPlace, setPreviewPlace] = useState(null);
+  const [panTo, setPanTo] = useState(null);
 
   useEffect(() => {
     supabase
@@ -53,6 +54,11 @@ export default function MapPage() {
 
   function handleSearchPreview(place) {
     setPreviewPlace(place);
+    // Pan map to the searched place
+    if (place.latitude && place.longitude) {
+      setViewMode('map');
+      setPanTo({ lat: place.latitude, lng: place.longitude });
+    }
   }
 
   function handlePreviewAdded(placeId) {
@@ -180,6 +186,7 @@ export default function MapPage() {
             useCaseTags={useCaseTags}
             userLocation={location}
             bundles={bundles}
+            panTo={panTo}
             onPlaceSelect={handlePlaceSelect}
             onCheckIn={handleCheckIn}
           />

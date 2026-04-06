@@ -35,9 +35,24 @@ export default function PlacePin({ place, onClick, tagMatch, colorMap }) {
     opacity = 1;
   }
 
-  // Hollow outline = never tapped/viewed by this user
-  // Solid filled = user has looked at this place
-  const isUnseen = !place.viewed && !tagMatch;
+  // Evaluated (stage 2+) always shows as solid — they've been interacted with
+  // Unseen (never tapped, stage 1) = hollow outline
+  // Seen but not evaluated = solid
+  // Wishlisted = gold ring
+  const isUnseen = !place.viewed && place.stage === 1 && !tagMatch;
+  const isWishlisted = place.wishlisted;
+
+  let bgColor, borderStyle;
+  if (isWishlisted) {
+    bgColor = color;
+    borderStyle = '3px solid #f59e0b'; // amber/gold ring
+  } else if (isUnseen) {
+    bgColor = 'white';
+    borderStyle = `2.5px solid ${color}`;
+  } else {
+    bgColor = color;
+    borderStyle = '2px solid white';
+  }
 
   return (
     <AdvancedMarker
@@ -47,11 +62,13 @@ export default function PlacePin({ place, onClick, tagMatch, colorMap }) {
       <div
         className="relative flex items-center justify-center rounded-full cursor-pointer"
         style={{
-          width: size,
-          height: size,
-          backgroundColor: isUnseen ? 'white' : color,
-          border: isUnseen ? `2.5px solid ${color}` : '2px solid white',
-          boxShadow: '0 1px 4px rgba(0,0,0,0.3)',
+          width: isWishlisted ? size + 2 : size,
+          height: isWishlisted ? size + 2 : size,
+          backgroundColor: bgColor,
+          border: borderStyle,
+          boxShadow: isWishlisted
+            ? '0 0 6px rgba(245, 158, 11, 0.5), 0 1px 4px rgba(0,0,0,0.3)'
+            : '0 1px 4px rgba(0,0,0,0.3)',
           opacity,
         }}
       >

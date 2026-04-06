@@ -9,6 +9,7 @@ import ConfidenceBadge from '@/components/ui/ConfidenceBadge';
 import RatingForm from './RatingForm';
 import TagVoter from './TagVoter';
 import AttributeForm from './AttributeForm';
+import PlacePhotos from './PlacePhotos';
 import { PIN_COLORS } from '@/utils/constants';
 import { useRouter } from 'next/navigation';
 
@@ -29,13 +30,14 @@ export default function PlaceDetail({ placeId }) {
   const [checkingIn, setCheckingIn] = useState(false);
   const [visited, setVisited] = useState(false);
   const [togglingVisited, setTogglingVisited] = useState(false);
+  const [wishlisted, setWishlisted] = useState(false);
   const supabase = createClient();
 
   const fetchData = useCallback(async () => {
     const { data: { user } } = await supabase.auth.getUser();
     setUserId(user?.id);
 
-    const [placeRes, ratingsRes, checkInsRes, tagVotesRes, tagsRes, visitedRes] =
+    const [placeRes, ratingsRes, checkInsRes, tagVotesRes, tagsRes, visitedRes, wishlistRes] =
       await Promise.all([
         supabase.from('places').select('*').eq('id', placeId).single(),
         supabase
@@ -61,6 +63,13 @@ export default function PlaceDetail({ placeId }) {
           .eq('place_id', placeId)
           .eq('user_id', user.id)
           .maybeSingle() : { data: null },
+        user ? supabase
+          .from('place_user_flags')
+          .select('flag')
+          .eq('place_id', placeId)
+          .eq('user_id', user.id)
+          .eq('flag', 'wishlist')
+          .maybeSingle() : { data: null },
       ]);
 
     setPlace(placeRes.data);
@@ -69,6 +78,7 @@ export default function PlaceDetail({ placeId }) {
     setTagVotes(tagVotesRes.data || []);
     setUseCaseTags(tagsRes.data || []);
     setVisited(!!visitedRes.data);
+    setWishlisted(!!wishlistRes.data);
     setNameInput(placeRes.data?.name || '');
     setNicknameInput(placeRes.data?.nickname || '');
 
@@ -215,6 +225,33 @@ export default function PlaceDetail({ placeId }) {
     setTogglingVisited(false);
   }
 
+  async function handleToggleWishlist() {
+    if (wishlisted) {
+      await supabase
+        .from('place_user_flags')
+        .delete()
+        .eq('place_id', placeId)
+        .eq('user_id', userId)
+        .eq('flag', 'wishlist');
+    } else {
+      await supabase.from('place_user_flags').insert({
+        place_id: placeId,
+        user_id: userId,
+        flag: 'wishlist',
+      });
+    }
+    setWishlisted(!wishlisted);
+  }
+
+  async function handleNotInterested() {
+    await supabase.from('place_user_flags').insert({
+      place_id: placeId,
+      user_id: userId,
+      flag: 'not_interested',
+    });
+    router.push('/map');
+  }
+
   return (
     <div className="pb-20">
       {/* Back button */}
@@ -308,6 +345,11 @@ export default function PlaceDetail({ placeId }) {
           />
         </MapProvider>
       </div>
+
+      {/* Google Maps photos */}
+      {place.google_place_id && (
+        <PlacePhotos googlePlaceId={place.google_place_id} />
+      )}
 
       {/* Tags */}
       <div className="p-4 border-b border-gray-100">
@@ -415,6 +457,12 @@ export default function PlaceDetail({ placeId }) {
       {/* Place actions */}
       <div className="p-4 flex gap-4">
         <button
+          onClick={handleNotInterested}
+          className="text-xs text-gray-500 hover:text-gray-700"
+        >
+          Not interested
+        </button>
+        <button
           onClick={handleHidePlace}
           className="text-xs text-gray-500 hover:text-gray-700"
         >
@@ -432,6 +480,19 @@ export default function PlaceDetail({ placeId }) {
 
       {/* Sticky action bar */}
       <div className="fixed bottom-12 left-0 right-0 bg-white border-t border-gray-200 px-4 py-2 flex gap-2 safe-bottom">
+        <button
+          onClick={handleToggleWishlist}
+          className={`rounded-lg px-3 py-2 text-sm font-medium transition-colors ${
+            wishlisted
+              ? 'bg-yellow-100 text-yellow-700 ring-1 ring-yellow-300'
+              : 'border border-gray-300 hover:bg-gray-50'
+          }`}
+        >
+          <svg className="w-4 h-4 inline-block mr-1" fill={wishlisted ? 'currentColor' : 'none'} viewBox="0 0 24 24" strokeWidth={2} stroke="currentColor">
+            <path strokeLinecap="round" strokeLinejoin="round" d="M17.593 3.322c1.1.128 1.907 1.077 1.907 2.185V21L12 17.25 4.5 21V5.507c0-1.108.806-2.057 1.907-2.185a48.507 48.507 0 0111.186 0z" />
+          </svg>
+          {wishlisted ? 'Saved' : 'Wishlist'}
+        </button>
         <button
           onClick={handleToggleVisited}
           disabled={togglingVisited}

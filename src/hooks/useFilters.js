@@ -8,6 +8,7 @@ const initialState = {
   selectedType: null,
   selectedTags: [],
   showUnvisited: true,
+  showWishlistOnly: false,
   tagFilterExpanded: false,
 };
 
@@ -30,6 +31,8 @@ function reducer(state, action) {
     }
     case 'TOGGLE_VISITED':
       return { ...state, showUnvisited: !state.showUnvisited };
+    case 'TOGGLE_WISHLIST':
+      return { ...state, showWishlistOnly: !state.showWishlistOnly };
     case 'TOGGLE_TAG_FILTER':
       return { ...state, tagFilterExpanded: !state.tagFilterExpanded };
     case 'CLEAR_ALL':
@@ -56,6 +59,11 @@ export function filterPlaces(places, filters) {
   // Layer 2: visited filter
   if (!filters.showUnvisited) {
     result = result.filter((p) => p.stage >= 2);
+  }
+
+  // Layer 2b: wishlist filter
+  if (filters.showWishlistOnly) {
+    result = result.filter((p) => p.wishlisted);
   }
 
   // Layer 3: tag filter

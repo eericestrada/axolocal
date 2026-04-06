@@ -55,10 +55,11 @@ export function usePlaces(groupId) {
     setState((prev) => ({ ...prev, loading: true }));
 
     // Step 1: fetch all places, hidden places, and visited places
-    const [placesRes, hiddenRes, visitedRes] = await Promise.all([
+    const [placesRes, hiddenRes, visitedRes, flagsRes] = await Promise.all([
       supabase.from('places').select('*').eq('group_id', groupId).range(0, 4999),
       supabase.from('hidden_places').select('place_id'),
       supabase.from('visited_places').select('place_id'),
+      supabase.from('place_user_flags').select('place_id, flag'),
     ]);
 
     if (placesRes.error) {
@@ -68,7 +69,15 @@ export function usePlaces(groupId) {
 
     const hiddenIds = new Set((hiddenRes.data || []).map((h) => h.place_id));
     const visitedSet = new Set((visitedRes.data || []).map((v) => v.place_id));
-    const places = (placesRes.data || []).filter((p) => !hiddenIds.has(p.id));
+    const notInterestedIds = new Set(
+      (flagsRes.data || []).filter((f) => f.flag === 'not_interested').map((f) => f.place_id)
+    );
+    const wishlistIds = new Set(
+      (flagsRes.data || []).filter((f) => f.flag === 'wishlist').map((f) => f.place_id)
+    );
+    const places = (placesRes.data || []).filter(
+      (p) => !hiddenIds.has(p.id) && !notInterestedIds.has(p.id)
+    );
 
     if (places.length === 0) {
       setState({ places: [], loading: false, error: null });
@@ -119,6 +128,7 @@ export function usePlaces(groupId) {
         tagSummary: buildTagSummary(tagVotes),
         stage: computeStage(place, ratingsMap, checkInsMap, tagVotesMap, visitedSet),
         visited: visitedSet.has(place.id),
+        wishlisted: wishlistIds.has(place.id),
         ratings,
       };
     });

@@ -177,6 +177,19 @@ export default function MapPage() {
             showUnvisited={filters.showUnvisited}
             onToggle={() => dispatch({ type: 'TOGGLE_VISITED' })}
           />
+          <button
+            onClick={() => dispatch({ type: 'TOGGLE_WISHLIST' })}
+            className={`shrink-0 flex items-center gap-1 rounded-full px-2.5 py-1 text-xs font-medium mr-2 ${
+              filters.showWishlistOnly
+                ? 'bg-yellow-100 text-yellow-700 ring-1 ring-yellow-300'
+                : 'bg-gray-100 text-gray-600'
+            }`}
+          >
+            <svg className="w-3 h-3" fill={filters.showWishlistOnly ? 'currentColor' : 'none'} viewBox="0 0 24 24" strokeWidth={2} stroke="currentColor">
+              <path strokeLinecap="round" strokeLinejoin="round" d="M17.593 3.322c1.1.128 1.907 1.077 1.907 2.185V21L12 17.25 4.5 21V5.507c0-1.108.806-2.057 1.907-2.185a48.507 48.507 0 0111.186 0z" />
+            </svg>
+            Wishlist
+          </button>
         </div>
       </div>
 

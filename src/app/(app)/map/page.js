@@ -82,6 +82,32 @@ export default function MapPage() {
     refetch();
   }
 
+  async function handleWishlist(place) {
+    if (place.wishlisted) {
+      await supabase
+        .from('place_user_flags')
+        .delete()
+        .eq('place_id', place.id)
+        .eq('user_id', userId)
+        .eq('flag', 'wishlist');
+    } else {
+      await supabase.from('place_user_flags').insert({
+        place_id: place.id,
+        user_id: userId,
+        flag: 'wishlist',
+      });
+    }
+    refetch();
+  }
+
+  async function handleHide(place) {
+    await supabase.from('hidden_places').insert({
+      place_id: place.id,
+      user_id: userId,
+    });
+    refetch();
+  }
+
   if (groupLoading) {
     return (
       <div className="flex items-center justify-center h-full">
@@ -204,6 +230,8 @@ export default function MapPage() {
             panTo={panTo}
             onPlaceSelect={handlePlaceSelect}
             onCheckIn={handleCheckIn}
+            onWishlist={handleWishlist}
+            onHide={handleHide}
           />
         ) : (
           <PlaceList

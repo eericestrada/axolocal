@@ -15,6 +15,8 @@ function MapInner({
   panTo,
   onPlaceSelect,
   onCheckIn,
+  onWishlist,
+  onHide,
 }) {
   const map = useMap();
 
@@ -107,6 +109,11 @@ function MapInner({
           onPlaceSelect?.(id);
         }}
         onCheckIn={onCheckIn}
+        onWishlist={onWishlist}
+        onHide={(place) => {
+          setSelectedPlace(null);
+          onHide?.(place);
+        }}
       />
     </div>
   );

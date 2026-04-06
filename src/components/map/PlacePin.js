@@ -35,9 +35,9 @@ export default function PlacePin({ place, onClick, tagMatch, colorMap }) {
     opacity = 1;
   }
 
-  // Stage 1: hollow outline pin (unevaluated)
-  // Stage 2+: solid filled pin (evaluated)
-  const isUneval = place.stage === 1 && !tagMatch;
+  // Hollow outline = never tapped/viewed by this user
+  // Solid filled = user has looked at this place
+  const isUnseen = !place.viewed && !tagMatch;
 
   return (
     <AdvancedMarker
@@ -49,8 +49,8 @@ export default function PlacePin({ place, onClick, tagMatch, colorMap }) {
         style={{
           width: size,
           height: size,
-          backgroundColor: isUneval ? 'white' : color,
-          border: isUneval ? `2.5px solid ${color}` : '2px solid white',
+          backgroundColor: isUnseen ? 'white' : color,
+          border: isUnseen ? `2.5px solid ${color}` : '2px solid white',
           boxShadow: '0 1px 4px rgba(0,0,0,0.3)',
           opacity,
         }}

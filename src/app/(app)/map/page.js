@@ -109,6 +109,14 @@ export default function MapPage() {
     refetch();
   }
 
+  function handleView(place) {
+    // Mark as viewed (fire and forget) — pin will fill in on next refetch
+    supabase.from('viewed_places').upsert(
+      { place_id: place.id, user_id: userId },
+      { onConflict: 'user_id,place_id' }
+    ).then(() => refetch());
+  }
+
   if (groupLoading) {
     return (
       <div className="flex items-center justify-center h-full">
@@ -233,6 +241,7 @@ export default function MapPage() {
             onCheckIn={handleCheckIn}
             onWishlist={handleWishlist}
             onHide={handleHide}
+            onView={handleView}
           />
         ) : (
           <PlaceList

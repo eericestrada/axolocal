@@ -17,6 +17,7 @@ function MapInner({
   onCheckIn,
   onWishlist,
   onHide,
+  onView,
 }) {
   const map = useMap();
 
@@ -46,7 +47,10 @@ function MapInner({
 
   const handlePinClick = useCallback((place) => {
     setSelectedPlace(place);
-  }, []);
+    if (!place.viewed) {
+      onView?.(place);
+    }
+  }, [onView]);
 
   return (
     <div className="relative w-full h-full">

@@ -1,29 +1,41 @@
 'use client';
 
-import { useState } from 'react';
+import { useState, Suspense } from 'react';
 import Image from 'next/image';
 import { createClient } from '@/lib/supabase/client';
 import Link from 'next/link';
-import { useRouter } from 'next/navigation';
+import { useRouter, useSearchParams } from 'next/navigation';
 
 export default function SignupPage() {
+  return (
+    <Suspense fallback={<div className="flex min-h-full items-center justify-center"><p className="text-gray-500">Loading...</p></div>}>
+      <SignupForm />
+    </Suspense>
+  );
+}
+
+function SignupForm() {
   const [email, setEmail] = useState('');
   const [password, setPassword] = useState('');
   const [displayName, setDisplayName] = useState('');
   const [error, setError] = useState(null);
   const [loading, setLoading] = useState(false);
   const router = useRouter();
+  const searchParams = useSearchParams();
+  const next = searchParams.get('next');
   const supabase = createClient();
 
   async function handleGoogleSignup() {
     setError(null);
     setLoading(true);
 
+    const redirectTo = next
+      ? `${window.location.origin}/auth/callback?next=${encodeURIComponent(next)}`
+      : `${window.location.origin}/auth/callback`;
+
     const { error } = await supabase.auth.signInWithOAuth({
       provider: 'google',
-      options: {
-        redirectTo: `${window.location.origin}/auth/callback`,
-      },
+      options: { redirectTo },
     });
 
     if (error) {
@@ -50,7 +62,7 @@ export default function SignupPage() {
       setError(error.message);
       setLoading(false);
     } else {
-      router.push('/group');
+      router.push(next || '/group');
       router.refresh();
     }
   }

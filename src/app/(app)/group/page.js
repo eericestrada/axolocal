@@ -22,13 +22,14 @@ export default function GroupPage() {
     if (!user) return;
     setCurrentUserId(user.id);
 
-    // Get user's group membership
-    const { data: membership } = await supabase
+    // Get user's group membership (first joined group)
+    const { data: memberships } = await supabase
       .from('group_members')
       .select('group_id, role, groups(id, name, description, invite_code)')
       .eq('user_id', user.id)
-      .limit(1)
-      .single();
+      .order('joined_at');
+
+    const membership = memberships?.[0];
 
     if (membership?.groups) {
       setGroup(membership.groups);

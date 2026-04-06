@@ -20,12 +20,14 @@ export function useGroup() {
       return;
     }
 
-    const { data: membership } = await supabase
+    // Get all memberships, pick the one with earliest joined_at (the "real" group)
+    const { data: memberships } = await supabase
       .from('group_members')
-      .select('group_id, role, groups(id, name, description, invite_code)')
+      .select('group_id, role, joined_at, groups(id, name, description, invite_code)')
       .eq('user_id', user.id)
-      .limit(1)
-      .single();
+      .order('joined_at');
+
+    const membership = memberships?.[0];
 
     if (!membership?.groups) {
       setState({ group: null, members: [], userId: user.id, userRole: null, loading: false });

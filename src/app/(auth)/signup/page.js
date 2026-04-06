@@ -62,7 +62,7 @@ function SignupForm() {
       setError(error.message);
       setLoading(false);
     } else {
-      router.push(next || '/group');
+      router.push(next || '/map');
       router.refresh();
     }
   }

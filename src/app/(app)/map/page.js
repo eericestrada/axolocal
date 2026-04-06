@@ -94,12 +94,13 @@ export default function MapPage() {
     return (
       <div className="flex items-center justify-center h-full p-4 text-center">
         <div>
-          <p className="text-gray-500 mb-2">No group yet</p>
+          <p className="text-lg font-bold mb-1">Welcome to Axolocal!</p>
+          <p className="text-gray-500 mb-4">Ask a friend for an invite link to join their group and start exploring.</p>
           <button
             onClick={() => router.push('/group')}
             className="text-green-600 font-medium text-sm"
           >
-            Create or join a group
+            Or create your own group
           </button>
         </div>
       </div>

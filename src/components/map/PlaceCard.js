@@ -3,6 +3,7 @@
 import BottomSheet from '@/components/ui/BottomSheet';
 import StarRating from '@/components/ui/StarRating';
 import ConfidenceBadge from '@/components/ui/ConfidenceBadge';
+import PlacePhotos from '@/components/places/PlacePhotos';
 import { PIN_COLORS } from '@/utils/constants';
 
 export default function PlaceCard({ place, useCaseTags, onClose, onDetail, onCheckIn }) {
@@ -64,6 +65,11 @@ export default function PlaceCard({ place, useCaseTags, onClose, onDetail, onChe
           </svg>
           <span className="underline truncate">{place.address}</span>
         </button>
+      )}
+
+      {/* Photos */}
+      {place.google_place_id && (
+        <PlacePhotos googlePlaceId={place.google_place_id} compact maxPhotos={3} />
       )}
 
       {/* Rating + tags in one row */}

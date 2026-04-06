@@ -109,7 +109,15 @@ function MapInner({
           onPlaceSelect?.(id);
         }}
         onCheckIn={onCheckIn}
-        onWishlist={onWishlist}
+        onWishlist={(place) => {
+          // Optimistic update so the button reflects immediately
+          setSelectedPlace((prev) =>
+            prev && prev.id === place.id
+              ? { ...prev, wishlisted: !prev.wishlisted }
+              : prev
+          );
+          onWishlist?.(place);
+        }}
         onHide={(place) => {
           setSelectedPlace(null);
           onHide?.(place);

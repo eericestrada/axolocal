@@ -35,17 +35,23 @@ export default function PlacePin({ place, onClick, tagMatch, colorMap }) {
     opacity = 1;
   }
 
+  // Stage 1: hollow outline pin (unevaluated)
+  // Stage 2+: solid filled pin (evaluated)
+  const isUneval = place.stage === 1 && !tagMatch;
+
   return (
     <AdvancedMarker
       position={{ lat: place.latitude, lng: place.longitude }}
       onClick={() => onClick?.(place)}
     >
       <div
-        className="relative flex items-center justify-center rounded-full border-2 border-white shadow-md cursor-pointer"
+        className="relative flex items-center justify-center rounded-full cursor-pointer"
         style={{
           width: size,
           height: size,
-          backgroundColor: place.stage === 1 && !tagMatch ? '#9ca3af' : color,
+          backgroundColor: isUneval ? 'white' : color,
+          border: isUneval ? `2.5px solid ${color}` : '2px solid white',
+          boxShadow: '0 1px 4px rgba(0,0,0,0.3)',
           opacity,
         }}
       >

@@ -97,7 +97,8 @@ export default function MapPage() {
         flag: 'wishlist',
       });
     }
-    refetch();
+    // Refetch returns a promise — await it so the card updates
+    await refetch();
   }
 
   async function handleHide(place) {
